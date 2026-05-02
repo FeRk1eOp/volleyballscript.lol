@@ -18,7 +18,7 @@ local SETTINGS = {
     Name = "Fer4ixz_ScriptHub_V28_FINAL",
     ToggleKey = Enum.KeyCode.RightShift,
     ProfileImage = "rbxassetid://96041759772811",
-    HeaderIcon = "rbxassetid://12097153733576",
+    HeaderIcon = "rbxassetid://89283807013725",
     HeaderTitle = "fer4ixzscripts.lol"
 }
 
@@ -953,7 +953,7 @@ discordBtn.TextSize = 14
 discordBtn.Parent = homeTab
 local discCorner = Instance.new("UICorner") discCorner.CornerRadius = UDim.new(0,8) discCorner.Parent = discordBtn
 
-local discordLink = "https://discord.gg/your_invite_code"  -- замените
+local discordLink = "https://discord.gg/gKTS29RjTP"  -- замените
 discordBtn.MouseButton1Click:Connect(function()
     pcall(function() game:GetService("GuiService"):OpenBrowserWindow(discordLink) end)
     if setclipboard then setclipboard(discordLink) notify("Link copied!", true) end
