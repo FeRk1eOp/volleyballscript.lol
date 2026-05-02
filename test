@@ -1,4 +1,4 @@
--- Fer4ixz ScriptHub V27 FINAL (Volleyball Legends) – полная версия
+-- Fer4ixz ScriptHub V28 FINAL (Volleyball Legends) – полностью исправлен
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -15,10 +15,10 @@ local Mouse = LocalPlayer:GetMouse()
 
 -- MENU SETTINGS
 local SETTINGS = {
-    Name = "Fer4ixz_ScriptHub_V27_FINAL",
+    Name = "Fer4ixz_ScriptHub_V28_FINAL",
     ToggleKey = Enum.KeyCode.RightShift,
     ProfileImage = "rbxassetid://96041759772811",
-    HeaderIcon = "rbxassetid://89283807013725",
+    HeaderIcon = "rbxassetid://12097153733576",
     HeaderTitle = "fer4ixzscripts.lol"
 }
 
@@ -218,6 +218,8 @@ local function updateTracers()
         end
     end
 end
+
+RunService.RenderStepped:Connect(updateTracers)
 
 -- ======================== SPHERICAL HITBOX ========================
 local hitboxSphere = nil
@@ -491,7 +493,8 @@ local function setupLegitLock(character)
     local root = character:WaitForChild("HumanoidRootPart", 5)
     if not hum or not root then return end
 
-    hum.StateChanged:Connect(function(_, newState)
+    local connection
+    connection = hum.StateChanged:Connect(function(_, newState)
         if not ScriptSettings.LegitLockEnabled then return end
         if newState ~= Enum.HumanoidStateType.Jumping then return end
         if legitLockCooldown then return end
@@ -513,6 +516,7 @@ local function setupLegitLock(character)
             end)
         end)
     end)
+    -- keep reference, but no need to store globally
 end
 
 if LocalPlayer.Character then setupLegitLock(LocalPlayer.Character) end
@@ -522,7 +526,7 @@ ContextActionService:BindAction("LegitLockToggle", function(_, state, _)
     if state == Enum.UserInputState.Begin then toggleLegitLock() end
 end, false, ScriptSettings.LegitLockKey)
 
--- ======================== GUI (адаптивное, с перетаскиванием) ========================
+-- ======================== GUI ========================
 local existing = CoreGui:FindFirstChild(SETTINGS.Name) or (LocalPlayer.PlayerGui and LocalPlayer.PlayerGui:FindFirstChild(SETTINGS.Name))
 if existing then existing:Destroy() end
 
@@ -531,7 +535,7 @@ ScreenGui.Name = SETTINGS.Name
 ScreenGui.ResetOnSpawn = false
 if CoreGui then ScreenGui.Parent = CoreGui elseif LocalPlayer.PlayerGui then ScreenGui.Parent = LocalPlayer.PlayerGui end
 
-local screenSize = workspace.CurrentCamera.ViewportSize
+local screenSize = Camera.ViewportSize
 local width = math.min(screenSize.X * 0.88, 500)
 local height = math.min(screenSize.Y * 0.82, 520)
 
@@ -624,7 +628,7 @@ CloseBtn.MouseButton1Click:Connect(function()
     for _, line in pairs(tracers) do if line then line:Destroy() end end
 end)
 
--- ======================== ИСПРАВЛЕННОЕ ПЕРЕТАСКИВАНИЕ ========================
+-- Перетаскивание (исправленное)
 local dragging = false
 local dragStart, startPos
 local DragBar = Instance.new("TextButton")
@@ -658,14 +662,10 @@ end
 
 DragBar.MouseButton1Down:Connect(startDrag)
 UserInputService.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        updateDrag()
-    end
+    if input.UserInputType == Enum.UserInputType.MouseMovement then updateDrag() end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        stopDrag()
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then stopDrag() end
 end)
 Mouse.Button1Up:Connect(stopDrag)
 
@@ -734,9 +734,8 @@ local function notify(text, isClick)
     task.spawn(function() task.wait(2) if n then n:Destroy() end end)
 end
 
--- Toggle & Stepper (универсальные функции)
+-- Helper functions for toggle and stepper (keep as in previous working version)
 local toggleRegistry = {}
-
 local function CreateToggle(parent, name, defaultVal, onFunc, offFunc)
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1,0,0,45)
@@ -872,7 +871,7 @@ local function CreateStepper(parent, labelText, minVal, maxVal, step, defaultVal
     return { setValue = setValue, getValue = function() return current end }
 end
 
--- Создание вкладок
+-- Tabs (create all six)
 local tabs = {}
 local function CreateTab(name, title)
     local btn = Instance.new("TextButton")
@@ -954,7 +953,7 @@ discordBtn.TextSize = 14
 discordBtn.Parent = homeTab
 local discCorner = Instance.new("UICorner") discCorner.CornerRadius = UDim.new(0,8) discCorner.Parent = discordBtn
 
-local discordLink = "https://discord.gg/gKTS29RjTP"  -- ЗАМЕНИТЕ
+local discordLink = "https://discord.gg/your_invite_code"  -- замените
 discordBtn.MouseButton1Click:Connect(function()
     pcall(function() game:GetService("GuiService"):OpenBrowserWindow(discordLink) end)
     if setclipboard then setclipboard(discordLink) notify("Link copied!", true) end
@@ -1145,7 +1144,7 @@ legitBindBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Automatization Tab (AutoSpin)
+-- Automatization Tab
 CreateToggle(autoTab, "AutoSpin Style", ScriptSettings.AutoSpinEnabled,
     function() ScriptSettings.AutoSpinEnabled = true; notify("AutoSpin Style ON", false) end,
     function() ScriptSettings.AutoSpinEnabled = false; notify("AutoSpin Style OFF", false) end)
@@ -1317,7 +1316,7 @@ for i = 1, 4 do
     end)
 end
 
--- ======================== CONFIG SYSTEM ========================
+-- CONFIG SYSTEM
 local useFS = pcall(function() return isfolder and makefolder and listfiles and writefile and readfile and delfile end)
 local globalCfgs = getgenv()._Fer4ixzConfigs or {}
 getgenv()._Fer4ixzConfigs = globalCfgs
@@ -1440,92 +1439,91 @@ end
 
 local function loadConfig(name)
     local data = loadCfg(name)
-    if data then
-        ScriptSettings.ESPEnabled = data.ESPEnabled
-        ScriptSettings.HPEnabled = data.HPEnabled
-        ScriptSettings.HitboxEnabled = data.HitboxEnabled
-        ScriptSettings.HitboxExtraSize = data.HitboxExtraSize
-        ScriptSettings.HitboxShowSphere = data.HitboxShowSphere
-        ScriptSettings.HitboxColor = Color3.fromRGB(data.HitboxColorR or 255, data.HitboxColorG or 0, data.HitboxColorB or 0)
-        ScriptSettings.HitboxTransparency = data.HitboxTransparency or 0.7
-        ScriptSettings.AirControlEnabled = data.AirControlEnabled
-        ScriptSettings.AirControlSpeed = data.AirControlSpeed or 30
-        ScriptSettings.AutoSpinEnabled = data.AutoSpinEnabled
-        ScriptSettings.AutoSpinType = data.AutoSpinType
-        ScriptSettings.AutoSpinSlot = data.AutoSpinSlot or 1
-        ScriptSettings.AutoAbilityEnabled = data.AutoAbilityEnabled
-        ScriptSettings.AutoAbilityType = data.AutoAbilityType
-        ScriptSettings.AutoAbilitySlot = data.AutoAbilitySlot or 1
-        ScriptSettings.TracerEnabled = data.TracerEnabled
-        ScriptSettings.TracerColor = Color3.fromRGB(data.TracerColorR or 255, data.TracerColorG or 100, data.TracerColorB or 0)
-        ScriptSettings.TracerLength = data.TracerLength or 15
-        ScriptSettings.TracerThickness = data.TracerThickness or 0.3
-        ScriptSettings.LegitLockEnabled = data.LegitLockEnabled
-        if data.LegitLockKeyCode then
-            ScriptSettings.LegitLockKey = Enum.KeyCode[data.LegitLockKeyCode] or Enum.KeyCode.L
-        end
-
-        if toggleRegistry["Enable Wallhack / ESP"] then toggleRegistry["Enable Wallhack / ESP"](ScriptSettings.ESPEnabled) end
-        if toggleRegistry["Show Health (HP)"] then toggleRegistry["Show Health (HP)"](ScriptSettings.HPEnabled) end
-        if toggleRegistry["Enable Hitbox Modification"] then toggleRegistry["Enable Hitbox Modification"](ScriptSettings.HitboxEnabled) end
-        if toggleRegistry["Show Sphere"] then toggleRegistry["Show Sphere"](ScriptSettings.HitboxShowSphere) end
-        if toggleRegistry["Move in Air (WASD)"] then toggleRegistry["Move in Air (WASD)"](ScriptSettings.AirControlEnabled) end
-        if toggleRegistry["AutoSpin Style"] then toggleRegistry["AutoSpin Style"](ScriptSettings.AutoSpinEnabled) end
-        if toggleRegistry["AutoSpin Ability"] then toggleRegistry["AutoSpin Ability"](ScriptSettings.AutoAbilityEnabled) end
-        if toggleRegistry["Enable Tracer"] then toggleRegistry["Enable Tracer"](ScriptSettings.TracerEnabled) end
-        if toggleRegistry["Legit Lock (Jump turn)"] then toggleRegistry["Legit Lock (Jump turn)"](ScriptSettings.LegitLockEnabled) end
-
-        radiusStepper.setValue(ScriptSettings.HitboxExtraSize)
-        alphaStepper.setValue(ScriptSettings.HitboxTransparency)
-        airSpeedStepper.setValue(ScriptSettings.AirControlSpeed)
-        lengthStepper.setValue(ScriptSettings.TracerLength)
-        thickStepper.setValue(ScriptSettings.TracerThickness)
-
-        styleTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoSpinType and "Lucky" or "Regular")
-        abilityTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoAbilityType and "Lucky" or "Regular")
-        updateStyleSlotLabel()
-        updateAbilitySlotLabel()
-        for i, btn in ipairs(styleSlotContainer:GetChildren()) do
-            if btn:IsA("TextButton") and tonumber(btn.Text) == ScriptSettings.AutoSpinSlot then
-                btn.BackgroundColor3 = COLORS.ButtonSelected
-            elseif btn:IsA("TextButton") then
-                btn.BackgroundColor3 = COLORS.Button
-            end
-        end
-        for i, btn in ipairs(abilitySlotContainer:GetChildren()) do
-            if btn:IsA("TextButton") and tonumber(btn.Text) == ScriptSettings.AutoAbilitySlot then
-                btn.BackgroundColor3 = COLORS.ButtonSelected
-            elseif btn:IsA("TextButton") then
-                btn.BackgroundColor3 = COLORS.Button
-            end
-        end
-        for i, col in ipairs(sphereColors) do
-            if col[1] == ScriptSettings.HitboxColor then
-                sphereColorIdx = i
-                colorBtn.Text = "Color: " .. col[2]
-                break
-            end
-        end
-        for i, col in ipairs(tracerColors) do
-            if col[1] == ScriptSettings.TracerColor then
-                tracerColorIdx = i
-                tracerColorBtn.Text = "Color: " .. col[2]
-                break
-            end
-        end
-        legitKeyLabel.Text = "Toggle key: " .. tostring(ScriptSettings.LegitLockKey):gsub("Enum.KeyCode.", "")
-        ContextActionService:UnbindAction("LegitLockToggle")
-        ContextActionService:BindAction("LegitLockToggle", function(_, state, _)
-            if state == Enum.UserInputState.Begin then toggleLegitLock() end
-        end, false, ScriptSettings.LegitLockKey)
-
-        ESP_Settings.ESPEnabled = ScriptSettings.ESPEnabled
-        ESP_Settings.HPEnabled = ScriptSettings.HPEnabled
-        UpdateESP()
-        updateHitboxSphere()
-        return true
+    if not data then return false end
+    ScriptSettings.ESPEnabled = data.ESPEnabled
+    ScriptSettings.HPEnabled = data.HPEnabled
+    ScriptSettings.HitboxEnabled = data.HitboxEnabled
+    ScriptSettings.HitboxExtraSize = data.HitboxExtraSize
+    ScriptSettings.HitboxShowSphere = data.HitboxShowSphere
+    ScriptSettings.HitboxColor = Color3.fromRGB(data.HitboxColorR or 255, data.HitboxColorG or 0, data.HitboxColorB or 0)
+    ScriptSettings.HitboxTransparency = data.HitboxTransparency or 0.7
+    ScriptSettings.AirControlEnabled = data.AirControlEnabled
+    ScriptSettings.AirControlSpeed = data.AirControlSpeed or 30
+    ScriptSettings.AutoSpinEnabled = data.AutoSpinEnabled
+    ScriptSettings.AutoSpinType = data.AutoSpinType
+    ScriptSettings.AutoSpinSlot = data.AutoSpinSlot or 1
+    ScriptSettings.AutoAbilityEnabled = data.AutoAbilityEnabled
+    ScriptSettings.AutoAbilityType = data.AutoAbilityType
+    ScriptSettings.AutoAbilitySlot = data.AutoAbilitySlot or 1
+    ScriptSettings.TracerEnabled = data.TracerEnabled
+    ScriptSettings.TracerColor = Color3.fromRGB(data.TracerColorR or 255, data.TracerColorG or 100, data.TracerColorB or 0)
+    ScriptSettings.TracerLength = data.TracerLength or 15
+    ScriptSettings.TracerThickness = data.TracerThickness or 0.3
+    ScriptSettings.LegitLockEnabled = data.LegitLockEnabled
+    if data.LegitLockKeyCode then
+        ScriptSettings.LegitLockKey = Enum.KeyCode[data.LegitLockKeyCode] or Enum.KeyCode.L
     end
-    return false
+
+    -- Apply toggles
+    if toggleRegistry["Enable Wallhack / ESP"] then toggleRegistry["Enable Wallhack / ESP"](ScriptSettings.ESPEnabled) end
+    if toggleRegistry["Show Health (HP)"] then toggleRegistry["Show Health (HP)"](ScriptSettings.HPEnabled) end
+    if toggleRegistry["Enable Hitbox Modification"] then toggleRegistry["Enable Hitbox Modification"](ScriptSettings.HitboxEnabled) end
+    if toggleRegistry["Show Sphere"] then toggleRegistry["Show Sphere"](ScriptSettings.HitboxShowSphere) end
+    if toggleRegistry["Move in Air (WASD)"] then toggleRegistry["Move in Air (WASD)"](ScriptSettings.AirControlEnabled) end
+    if toggleRegistry["AutoSpin Style"] then toggleRegistry["AutoSpin Style"](ScriptSettings.AutoSpinEnabled) end
+    if toggleRegistry["AutoSpin Ability"] then toggleRegistry["AutoSpin Ability"](ScriptSettings.AutoAbilityEnabled) end
+    if toggleRegistry["Enable Tracer"] then toggleRegistry["Enable Tracer"](ScriptSettings.TracerEnabled) end
+    if toggleRegistry["Legit Lock (Jump turn)"] then toggleRegistry["Legit Lock (Jump turn)"](ScriptSettings.LegitLockEnabled) end
+
+    radiusStepper.setValue(ScriptSettings.HitboxExtraSize)
+    alphaStepper.setValue(ScriptSettings.HitboxTransparency)
+    airSpeedStepper.setValue(ScriptSettings.AirControlSpeed)
+    lengthStepper.setValue(ScriptSettings.TracerLength)
+    thickStepper.setValue(ScriptSettings.TracerThickness)
+
+    styleTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoSpinType and "Lucky" or "Regular")
+    abilityTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoAbilityType and "Lucky" or "Regular")
+    updateStyleSlotLabel()
+    updateAbilitySlotLabel()
+    for _, btn in ipairs(styleSlotContainer:GetChildren()) do
+        if btn:IsA("TextButton") and tonumber(btn.Text) == ScriptSettings.AutoSpinSlot then
+            btn.BackgroundColor3 = COLORS.ButtonSelected
+        elseif btn:IsA("TextButton") then
+            btn.BackgroundColor3 = COLORS.Button
+        end
+    end
+    for _, btn in ipairs(abilitySlotContainer:GetChildren()) do
+        if btn:IsA("TextButton") and tonumber(btn.Text) == ScriptSettings.AutoAbilitySlot then
+            btn.BackgroundColor3 = COLORS.ButtonSelected
+        elseif btn:IsA("TextButton") then
+            btn.BackgroundColor3 = COLORS.Button
+        end
+    end
+    for i, col in ipairs(sphereColors) do
+        if col[1] == ScriptSettings.HitboxColor then
+            sphereColorIdx = i
+            colorBtn.Text = "Color: " .. col[2]
+            break
+        end
+    end
+    for i, col in ipairs(tracerColors) do
+        if col[1] == ScriptSettings.TracerColor then
+            tracerColorIdx = i
+            tracerColorBtn.Text = "Color: " .. col[2]
+            break
+        end
+    end
+    legitKeyLabel.Text = "Toggle key: " .. tostring(ScriptSettings.LegitLockKey):gsub("Enum.KeyCode.", "")
+    ContextActionService:UnbindAction("LegitLockToggle")
+    ContextActionService:BindAction("LegitLockToggle", function(_, state, _)
+        if state == Enum.UserInputState.Begin then toggleLegitLock() end
+    end, false, ScriptSettings.LegitLockKey)
+
+    ESP_Settings.ESPEnabled = ScriptSettings.ESPEnabled
+    ESP_Settings.HPEnabled = ScriptSettings.HPEnabled
+    UpdateESP()
+    updateHitboxSphere()
+    return true
 end
 
 local autoStart = getAuto()
@@ -1760,7 +1758,7 @@ if tabs["Home"] then
     tabs["Home"].page.Visible = true
 end
 
--- Toggle UI
+-- Toggle menu
 UserInputService.InputBegan:Connect(function(inp, gp)
     if gp then return end
     if inp.KeyCode == SETTINGS.ToggleKey then
@@ -1768,14 +1766,11 @@ UserInputService.InputBegan:Connect(function(inp, gp)
     end
 end)
 
+-- Cleanup (no BindToClose)
 ScreenGui.Destroying:Connect(function()
     if ESP_Folder then ESP_Folder:Destroy() end
     if hitboxSphere then hitboxSphere:Destroy() end
     for _, line in pairs(tracers) do if line then line:Destroy() end end
 end)
-game:BindToClose(function()
-    if ESP_Folder then ESP_Folder:Destroy() end
-    if hitboxSphere then hitboxSphere:Destroy() end
-end)
 
-print("✅ Volleyball Legends Script loaded (full). Press RightShift to open menu.")
+print("✅ Volleyball Legends Script V28 fully loaded. Press RightShift to open menu.")
