@@ -583,23 +583,85 @@ Controls.Position = UDim2.new(1, -75, 0, 0)
 Controls.BackgroundTransparency = 1
 Controls.Parent = Header
 
-local function createControlButton(text, bgColor, x)
+local function createIconButton(iconType, x)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 35, 0, 35)
-    btn.Position = UDim2.new(0, x, 0.5, -17)
-    btn.BackgroundColor3 = bgColor
-    btn.BackgroundTransparency = 0.5
-    btn.Text = text
-    btn.TextColor3 = COLORS.Text
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 20
+    btn.Size = UDim2.new(0, 32, 0, 32)
+    btn.Position = UDim2.new(0, x, 0.5, -16)
+    btn.BackgroundColor3 = COLORS.Button
+    btn.BackgroundTransparency = 0
+    btn.Text = ""
+    btn.BorderSizePixel = 0
+    btn.ZIndex = 5
     btn.Parent = Controls
-    local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0,8) corner.Parent = btn
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+
+    local iconFrame = Instance.new("Frame")
+    iconFrame.Size = UDim2.new(1, 0, 1, 0)
+    iconFrame.BackgroundTransparency = 1
+    iconFrame.ZIndex = 6
+    iconFrame.Parent = btn
+
+    if iconType == "Close" then
+        local line1 = Instance.new("Frame")
+        line1.Size = UDim2.new(0, 18, 0, 4)
+        line1.Position = UDim2.new(0.5, -9, 0.5, -2)
+        line1.Rotation = 45
+        line1.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+        line1.BorderSizePixel = 0
+        line1.ZIndex = 7
+        line1.Parent = iconFrame
+
+        local corner1 = Instance.new("UICorner")
+        corner1.CornerRadius = UDim.new(0, 2)
+        corner1.Parent = line1
+
+        local line2 = line1:Clone()
+        line2.Rotation = -45
+        line2.ZIndex = 7
+        line2.Parent = iconFrame
+
+        btn.MouseEnter:Connect(function()
+            line1.BackgroundColor3 = Color3.fromRGB(255, 120, 120)
+            line2.BackgroundColor3 = Color3.fromRGB(255, 120, 120)
+            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        end)
+        btn.MouseLeave:Connect(function()
+            line1.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+            line2.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+            btn.BackgroundColor3 = COLORS.Button
+        end)
+
+    elseif iconType == "Minimize" then
+        local line = Instance.new("Frame")
+        line.Size = UDim2.new(0, 18, 0, 4)
+        line.Position = UDim2.new(0.5, -9, 0.5, 0)
+        line.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        line.BorderSizePixel = 0
+        line.ZIndex = 7
+        line.Parent = iconFrame
+
+        local lineCorner = Instance.new("UICorner")
+        lineCorner.CornerRadius = UDim.new(0, 2)
+        lineCorner.Parent = line
+
+        btn.MouseEnter:Connect(function()
+            line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        end)
+        btn.MouseLeave:Connect(function()
+            line.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+            btn.BackgroundColor3 = COLORS.Button
+        end)
+    end
+
     return btn
 end
 
-local MinBtn = createControlButton("—", COLORS.Button, 45)
-local CloseBtn = createControlButton("✕", Color3.fromRGB(200,50,50), 15)
+local MinBtn = createIconButton("Minimize", 43)
+local CloseBtn = createIconButton("Close", 8)
 
 local Body = Instance.new("Frame")
 Body.Size = UDim2.new(1,0,1,-HEADER_H)
@@ -612,10 +674,8 @@ MinBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
     if minimized then
         Body.Visible = false
-        MinBtn.Text = "□"
         TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, width, 0, HEADER_H)}):Play()
     else
-        MinBtn.Text = "—"
         TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, width, 0, height)}):Play()
         task.wait(0.2)
         Body.Visible = true
@@ -733,7 +793,7 @@ Content.Size = UDim2.new(1,-150,1,0)
 Content.Position = UDim2.new(0,150,0,0)
 Content.BackgroundColor3 = COLORS.Background
 Content.BackgroundTransparency = 1
-Content.ClipsDescendants = false  -- 🔥 Важно для прокрутки
+Content.ClipsDescendants = false
 Content.Parent = Body
 local ContentPad = Instance.new("UIPadding")
 ContentPad.PaddingTop = UDim.new(0,15)
@@ -925,19 +985,19 @@ local function CreateTab(name, title)
     page.ScrollBarThickness = 5
     page.ScrollBarImageColor3 = COLORS.Stroke
     page.CanvasSize = UDim2.new(0, 0, 0, 0)
-    page.AutomaticCanvasSize = Enum.AutomaticSize.Y  -- 🔥 Авто-высота контента
+    page.AutomaticCanvasSize = Enum.AutomaticSize.Y
     page.ScrollingEnabled = true
     page.Visible = false
     page.Parent = Content
-    
+
     page.HorizontalScrollBarInset = Enum.ScrollBarInset.None
     page.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-    
+
     local pageLayout = Instance.new("UIListLayout")
     pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
     pageLayout.Padding = UDim.new(0, 8)
     pageLayout.Parent = page
-    
+
     local pagePadding = Instance.new("UIPadding")
     pagePadding.PaddingTop = UDim.new(0, 10)
     pagePadding.PaddingBottom = UDim.new(0, 10)
@@ -1484,11 +1544,10 @@ local function createConfig(name)
     return saveCfg(name, data)
 end
 
--- 🔥 ИСПРАВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ КОНФИГА
 local function loadConfig(name)
     local data = loadCfg(name)
     if not data then return false end
-    
+
     ScriptSettings.ESPEnabled = data.ESPEnabled
     ScriptSettings.HPEnabled = data.HPEnabled
     ScriptSettings.HitboxEnabled = data.HitboxEnabled
@@ -1554,7 +1613,7 @@ local function loadConfig(name)
     -- Обновление слотов (визуал)
     updateStyleSlotLabel()
     updateAbilitySlotLabel()
-    
+
     if styleSlotContainer then
         for _, btn in ipairs(styleSlotContainer:GetChildren()) do
             if btn:IsA("TextButton") then
@@ -1586,7 +1645,7 @@ local function loadConfig(name)
     ESP_Settings.HPEnabled = ScriptSettings.HPEnabled
     UpdateESP()
     updateHitboxSphere()
-    
+
     return true
 end
 
