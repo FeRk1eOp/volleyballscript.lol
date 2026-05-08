@@ -7,65 +7,41 @@
 # Logs and temporary files
 *.log
 *.tmp
+*.swp
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
+# Editors and IDEs
+.vscode/
+.idea/
+
+# Dependencies and build artifacts
+node_modules/
 venv/
 .venv/
-.venv.bak/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-*.pot
-*.pyc
-*.pyo
-*.pyd
-.MF
-tags
-TAGS
-.IDEAVIMRC
-.pydevproject
-.vscode/
-
-# Build artifacts
-build/
+__pycache__/
 dist/
-*.egg
-*.egg-info/
-.eggs/
-.installed.cfg
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.whl
-*.sublime-workspace
+build/
+target/
+.gradle/
 
-# Testing
+# Compiled files
+*.pyc
+*.class
+*.o
+*.exe
+*.dll
+*.so
+*.a
+*.obj
+*.out
+
+# Coverage and testing
+coverage/
+htmlcov/
+.coverage
+.mypy_cache/
 .pytest_cache/
-.hypothesis/
-cover/
 
-# IDE
-.idea/
-*.swp
-*.swo
-
-# OS
+# System files
 .DS_Store
 Thumbs.db
 

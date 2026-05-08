@@ -583,23 +583,44 @@ Controls.Position = UDim2.new(1, -75, 0, 0)
 Controls.BackgroundTransparency = 1
 Controls.Parent = Header
 
-local function createControlButton(text, bgColor, x)
+local function createControlButton(icon, bgColor, hoverColor, x)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 35, 0, 35)
-    btn.Position = UDim2.new(0, x, 0.5, -17)
+    btn.Size = UDim2.new(0, 32, 0, 32)
+    btn.Position = UDim2.new(0, x, 0.5, -16)
     btn.BackgroundColor3 = bgColor
-    btn.BackgroundTransparency = 0.5
-    btn.Text = text
+    btn.BackgroundTransparency = 0.3
+    btn.Text = icon
     btn.TextColor3 = COLORS.Text
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 20
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18
+    btn.AutoButtonColor = false
     btn.Parent = Controls
-    local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0,8) corner.Parent = btn
+    local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0,6) corner.Parent = btn
+    local stroke = Instance.new("UIStroke") stroke.Thickness = 0 stroke.Color = COLORS.Stroke stroke.Parent = btn
+    
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = hoverColor, BackgroundTransparency = 0}):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.15), {Thickness = 1}):Play()
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = bgColor, BackgroundTransparency = 0.3}):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.15), {Thickness = 0}):Play()
+    end)
+    
+    btn.MouseButton1Down:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.08), {Size = UDim2.new(0, 28, 0, 28)}):Play()
+    end)
+    
+    btn.MouseButton1Up:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.08), {Size = UDim2.new(0, 32, 0, 32)}):Play()
+    end)
+    
     return btn
 end
 
-local MinBtn = createControlButton("—", COLORS.Button, 45)
-local CloseBtn = createControlButton("✕", Color3.fromRGB(200,50,50), 15)
+local MinBtn = createControlButton("−", COLORS.Button, Color3.fromRGB(60,60,60), 48)
+local CloseBtn = createControlButton("✕", Color3.fromRGB(180,60,60), Color3.fromRGB(220,70,70), 12)
 
 local Body = Instance.new("Frame")
 Body.Size = UDim2.new(1,0,1,-HEADER_H)
