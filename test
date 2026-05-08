@@ -1472,9 +1472,9 @@ local function serializeConfigData()
         HitboxEnabled = ScriptSettings.HitboxEnabled,
         HitboxExtraSize = ScriptSettings.HitboxExtraSize,
         HitboxShowSphere = ScriptSettings.HitboxShowSphere,
-        HitboxColorR = ScriptSettings.HitboxColor.R,
-        HitboxColorG = ScriptSettings.HitboxColor.G,
-        HitboxColorB = ScriptSettings.HitboxColor.B,
+        HitboxColorR = math.floor(ScriptSettings.HitboxColor.R * 255 + 0.5),
+        HitboxColorG = math.floor(ScriptSettings.HitboxColor.G * 255 + 0.5),
+        HitboxColorB = math.floor(ScriptSettings.HitboxColor.B * 255 + 0.5),
         HitboxTransparency = ScriptSettings.HitboxTransparency,
         AirControlEnabled = ScriptSettings.AirControlEnabled,
         AirControlSpeed = ScriptSettings.AirControlSpeed,
@@ -1485,9 +1485,9 @@ local function serializeConfigData()
         AutoAbilityType = ScriptSettings.AutoAbilityType,
         AutoAbilitySlot = ScriptSettings.AutoAbilitySlot,
         TracerEnabled = ScriptSettings.TracerEnabled,
-        TracerColorR = ScriptSettings.TracerColor.R,
-        TracerColorG = ScriptSettings.TracerColor.G,
-        TracerColorB = ScriptSettings.TracerColor.B,
+        TracerColorR = math.floor(ScriptSettings.TracerColor.R * 255 + 0.5),
+        TracerColorG = math.floor(ScriptSettings.TracerColor.G * 255 + 0.5),
+        TracerColorB = math.floor(ScriptSettings.TracerColor.B * 255 + 0.5),
         TracerLength = ScriptSettings.TracerLength,
         TracerThickness = ScriptSettings.TracerThickness,
         LegitLockEnabled = ScriptSettings.LegitLockEnabled,
@@ -1512,9 +1512,9 @@ local function loadConfig(name)
     ScriptSettings.HitboxExtraSize = type(data.HitboxExtraSize) == "number" and data.HitboxExtraSize or 0
     ScriptSettings.HitboxShowSphere = data.HitboxShowSphere == true
     ScriptSettings.HitboxColor = Color3.fromRGB(
-        type(data.HitboxColorR) == "number" and math.clamp(data.HitboxColorR, 0, 255) or 255,
-        type(data.HitboxColorG) == "number" and math.clamp(data.HitboxColorG, 0, 255) or 0,
-        type(data.HitboxColorB) == "number" and math.clamp(data.HitboxColorB, 0, 255) or 0
+        type(data.HitboxColorR) == "number" and math.clamp(math.floor(data.HitboxColorR), 0, 255) or 255,
+        type(data.HitboxColorG) == "number" and math.clamp(math.floor(data.HitboxColorG), 0, 255) or 0,
+        type(data.HitboxColorB) == "number" and math.clamp(math.floor(data.HitboxColorB), 0, 255) or 0
     )
     ScriptSettings.HitboxTransparency = type(data.HitboxTransparency) == "number" and math.clamp(data.HitboxTransparency, 0, 1) or 0.7
     ScriptSettings.AirControlEnabled = data.AirControlEnabled == true
@@ -1527,9 +1527,9 @@ local function loadConfig(name)
     ScriptSettings.AutoAbilitySlot = type(data.AutoAbilitySlot) == "number" and math.clamp(data.AutoAbilitySlot, 1, 3) or 1
     ScriptSettings.TracerEnabled = data.TracerEnabled == true
     ScriptSettings.TracerColor = Color3.fromRGB(
-        type(data.TracerColorR) == "number" and math.clamp(data.TracerColorR, 0, 255) or 255,
-        type(data.TracerColorG) == "number" and math.clamp(data.TracerColorG, 0, 255) or 100,
-        type(data.TracerColorB) == "number" and math.clamp(data.TracerColorB, 0, 255) or 0
+        type(data.TracerColorR) == "number" and math.clamp(math.floor(data.TracerColorR), 0, 255) or 255,
+        type(data.TracerColorG) == "number" and math.clamp(math.floor(data.TracerColorG), 0, 255) or 100,
+        type(data.TracerColorB) == "number" and math.clamp(math.floor(data.TracerColorB), 0, 255) or 0
     )
     ScriptSettings.TracerLength = type(data.TracerLength) == "number" and data.TracerLength or 15
     ScriptSettings.TracerThickness = type(data.TracerThickness) == "number" and data.TracerThickness or 0.3

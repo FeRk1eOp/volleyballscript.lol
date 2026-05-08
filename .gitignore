@@ -1,49 +1,73 @@
 ```
-# Environment
+# Environment files
 .env
 .env.local
 .env.*
 
-# Logs and temp files
+# Logs and temporary files
 *.log
 *.tmp
-*.swp
 
-# Editors
-.vscode/
-.idea/
-
-# Dependencies
-node_modules/
-.venv/
-venv/
+# Python
 __pycache__/
-.mypy_cache/
-.pytest_cache/
-dist/
-build/
-target/
-.gradle/
-
-# Compiled files
 *.pyc
-*.class
-*.o
-*.exe
-*.dll
-*.so
-*.a
-*.obj
-*.out
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+.MF
+tags
+TAGS
+.IDEAVIMRC
+.pydevproject
+.vscode/
 
-# System files
+# Build artifacts
+build/
+dist/
+*.egg
+*.egg-info/
+.eggs/
+.installed.cfg
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.whl
+*.sublime-workspace
+
+# Testing
+.pytest_cache/
+.hypothesis/
+cover/
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
 .DS_Store
 Thumbs.db
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
 
 # Compressed files
 *.zip
