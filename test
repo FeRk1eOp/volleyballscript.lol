@@ -583,72 +583,97 @@ Controls.Position = UDim2.new(1, -75, 0, 0)
 Controls.BackgroundTransparency = 1
 Controls.Parent = Header
 
-local function createControlButton(icon, bgColor, hoverColor, x)
+local function createIconButton(parent, iconType, positionX)
     local btn = Instance.new("TextButton")
+    btn.Name = iconType .. "Btn"
     btn.Size = UDim2.new(0, 32, 0, 32)
-    btn.Position = UDim2.new(0, x, 0.5, -16)
-    btn.BackgroundColor3 = bgColor
-    btn.BackgroundTransparency = 0.3
-    btn.Text = icon
-    btn.TextColor3 = COLORS.Text
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 18
+    btn.Position = UDim2.new(1, -40 - positionX, 0, 8)
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    btn.BorderSizePixel = 0
     btn.AutoButtonColor = false
-    btn.Parent = Controls
-    local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0,6) corner.Parent = btn
-    local stroke = Instance.new("UIStroke") stroke.Thickness = 0 stroke.Color = COLORS.Stroke stroke.Parent = btn
-    
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = hoverColor, BackgroundTransparency = 0}):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.15), {Thickness = 1}):Play()
-    end)
-    
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = bgColor, BackgroundTransparency = 0.3}):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.15), {Thickness = 0}):Play()
-    end)
-    
-    btn.MouseButton1Down:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.08), {Size = UDim2.new(0, 28, 0, 28)}):Play()
-    end)
-    
-    btn.MouseButton1Up:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.08), {Size = UDim2.new(0, 32, 0, 32)}):Play()
-    end)
-    
+    btn.Parent = parent
+
+    local corner = Instance.new("UICorner", btn)
+    corner.CornerRadius = UDim.new(0, 6)
+
+    local iconHolder = Instance.new("Frame")
+    iconHolder.Size = UDim2.new(1, 0, 1, 0)
+    iconHolder.BackgroundTransparency = 1
+    iconHolder.Parent = btn
+
+    if iconType == "Close" then
+        local line1 = Instance.new("Frame")
+        line1.Size = UDim2.new(0, 2, 0, 2)
+        line1.Position = UDim2.new(0.5, -1, 0.5, -1)
+        line1.Rotation = 45
+        line1.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+        line1.BorderSizePixel = 0
+        line1.Parent = iconHolder
+
+        local line2 = line1:Clone()
+        line2.Rotation = -45
+        line2.Parent = iconHolder
+
+        btn.MouseEnter:Connect(function()
+            line1.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+            line2.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+            btn.BackgroundColor3 = Color3.fromRGB(55, 45, 45)
+        end)
+
+        btn.MouseLeave:Connect(function()
+            line1.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+            line2.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        end)
+
+    elseif iconType == "Minimize" then
+        local line = Instance.new("Frame")
+        line.Size = UDim2.new(0, 14, 0, 2)
+        line.Position = UDim2.new(0.5, -7, 0.5, 0)
+        line.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        line.BorderSizePixel = 0
+        line.Parent = iconHolder
+
+        btn.MouseEnter:Connect(function()
+            line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+        end)
+
+        btn.MouseLeave:Connect(function()
+            line.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        end)
+    end
+
     return btn
 end
 
-local MinBtn = createControlButton("−", COLORS.Button, Color3.fromRGB(60,60,60), 48)
-local CloseBtn = createControlButton("✕", Color3.fromRGB(180,60,60), Color3.fromRGB(220,70,70), 12)
+local closeBtn = createIconButton(mainFrame, "Close", 0)
+local minimizeBtn = createIconButton(mainFrame, "Minimize", 40)
 
-local Body = Instance.new("Frame")
-Body.Size = UDim2.new(1,0,1,-HEADER_H)
-Body.Position = UDim2.new(0,0,0,HEADER_H)
-Body.BackgroundTransparency = 1
-Body.Parent = MainFrame
+closeBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+end)
 
-local minimized = false
-MinBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    if minimized then
-        Body.Visible = false
-        MinBtn.Text = "□"
-        TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, width, 0, HEADER_H)}):Play()
+minimizeBtn.MouseButton1Click:Connect(function()
+    if mainFrame.Size.Y.Scale == 1 then
+        oldSize = mainFrame.Size
+        mainFrame:TweenSize(UDim2.new(mainFrame.Size.X.Scale, mainFrame.Size.X.Offset, 0, 40), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2)
+        for _, child in ipairs(mainFrame:GetChildren()) do
+            if child:IsA("Frame") and child.Name ~= "TopBar" then
+                child.Visible = false
+            end
+        end
     else
-        MinBtn.Text = "—"
-        TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, width, 0, height)}):Play()
+        mainFrame:TweenSize(oldSize or UDim2.new(0, 400, 0, 300), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2)
         task.wait(0.2)
-        Body.Visible = true
+        for _, child in ipairs(mainFrame:GetChildren()) do
+            if child:IsA("Frame") and child.Name ~= "TopBar" then
+                child.Visible = true
+            end
+        end
     end
 end)
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-    if ESP_Folder then ESP_Folder:Destroy() end
-    if hitboxSphere then hitboxSphere:Destroy() end
-    for _, line in pairs(tracers) do if line then line:Destroy() end end
-end)
-
 -- ======================== DRAGGING (MOBILE + PC FIX) ========================
 local dragging = false
 local dragInput = nil
