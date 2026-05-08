@@ -8,11 +8,9 @@ local HttpService = game:GetService("HttpService")
 local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Camera = workspace.CurrentCamera
-
 local LocalPlayer = Players.LocalPlayer
 while not LocalPlayer do task.wait() end
 local Mouse = LocalPlayer:GetMouse()
-
 -- MENU SETTINGS
 local SETTINGS = {
     Name = "Fer4ixz_ScriptHub_V28_FINAL",
@@ -21,7 +19,6 @@ local SETTINGS = {
     HeaderIcon = "rbxassetid://89283807013725",
     HeaderTitle = "fer4ixzscripts.lol"
 }
-
 local COLORS = {
     Background = Color3.fromRGB(15,15,15),
     Sidebar = Color3.fromRGB(10,10,10),
@@ -31,7 +28,6 @@ local COLORS = {
     TextDark = Color3.fromRGB(150,150,150),
     Stroke = Color3.fromRGB(45,45,45),
 }
-
 -- GLOBAL SETTINGS (saved in config)
 local ScriptSettings = {
     ESPEnabled = true,
@@ -56,20 +52,17 @@ local ScriptSettings = {
     LegitLockEnabled = false,
     LegitLockKey = Enum.KeyCode.L,
 }
-
 -- ======================== ESP ========================
 local ESP_Settings = {
     ESPEnabled = true,
     HPEnabled = true,
     TeamBlueColor = Color3.fromRGB(0,170,255)
 }
-
 local ESP_Folder = Instance.new("Folder")
 ESP_Folder.Name = "ESP_Container"
 if CoreGui then ESP_Folder.Parent = CoreGui
 elseif LocalPlayer:FindFirstChild("PlayerGui") then ESP_Folder.Parent = LocalPlayer.PlayerGui
 else ESP_Folder.Parent = workspace end
-
 local function ClearPlayerESP(p)
     if p and p.Character then
         local h = p.Character:FindFirstChild("ESPHighlight")
@@ -81,7 +74,6 @@ local function ClearPlayerESP(p)
         end
     end
 end
-
 local function UpdateESP()
     for _, p in pairs(Players:GetPlayers()) do
         if p and p ~= LocalPlayer and p.Character then
@@ -149,9 +141,7 @@ local function UpdateESP()
         end
     end
 end
-
 RunService.RenderStepped:Connect(function() pcall(UpdateESP) end)
-
 Players.PlayerAdded:Connect(function(p)
     p.CharacterAdded:Connect(function() task.wait(0.5) pcall(UpdateESP) end)
     p.CharacterRemoving:Connect(function() pcall(ClearPlayerESP, p) end)
@@ -161,10 +151,8 @@ for _, p in pairs(Players:GetPlayers()) do
         p.CharacterAdded:Connect(function() task.wait(0.5) pcall(UpdateESP) end)
     end
 end
-
 -- ======================== TRACER ========================
 local tracers = {}
-
 local function updateTracers()
     if not ScriptSettings.TracerEnabled then
         for _, line in pairs(tracers) do
@@ -218,15 +206,12 @@ local function updateTracers()
         end
     end
 end
-
 RunService.RenderStepped:Connect(updateTracers)
-
 -- ======================== SPHERICAL HITBOX ========================
 local hitboxSphere = nil
 local hitboxWeld = nil
 local currentBall = nil
 local basePartSize = nil
-
 local function findBall()
     for _, child in ipairs(workspace:GetChildren()) do
         if string.match(child.Name, "^CLIENT_BALL_") then
@@ -235,7 +220,6 @@ local function findBall()
     end
     return nil
 end
-
 local function findBasePart(ball)
     if not ball then return nil end
     for _, child in ipairs(ball:GetChildren()) do
@@ -245,7 +229,6 @@ local function findBasePart(ball)
     end
     return nil
 end
-
 local function createSphere(centerPart, radius)
     if hitboxSphere then hitboxSphere:Destroy() end
     if hitboxWeld then hitboxWeld:Destroy() end
@@ -266,7 +249,6 @@ local function createSphere(centerPart, radius)
     hitboxWeld.Parent = s
     return s
 end
-
 local function updateHitboxSphere()
     if not hitboxSphere or not basePartSize then return end
     local baseRadius = (basePartSize.X + basePartSize.Y + basePartSize.Z) / 6
@@ -279,7 +261,6 @@ local function updateHitboxSphere()
     hitboxSphere.Color = ScriptSettings.HitboxColor
     hitboxSphere.Transparency = ScriptSettings.HitboxShowSphere and ScriptSettings.HitboxTransparency or 1
 end
-
 task.spawn(function()
     while true do
         pcall(function()
@@ -312,10 +293,8 @@ task.spawn(function()
         task.wait(0.1)
     end
 end)
-
 -- ======================== AIR CONTROL ========================
 local airKeys = {W=false, A=false, S=false, D=false}
-
 local function handleAirInput(_, inputState, input)
     local key = input.KeyCode
     local state = (inputState == Enum.UserInputState.Begin)
@@ -329,7 +308,6 @@ ContextActionService:BindAction("AirW", handleAirInput, false, Enum.KeyCode.W)
 ContextActionService:BindAction("AirA", handleAirInput, false, Enum.KeyCode.A)
 ContextActionService:BindAction("AirS", handleAirInput, false, Enum.KeyCode.S)
 ContextActionService:BindAction("AirD", handleAirInput, false, Enum.KeyCode.D)
-
 local function fixAutoRotate(character)
     local hum = character:WaitForChild("Humanoid")
     hum.AutoRotate = true
@@ -339,7 +317,6 @@ local function fixAutoRotate(character)
 end
 if LocalPlayer.Character then fixAutoRotate(LocalPlayer.Character) end
 LocalPlayer.CharacterAdded:Connect(fixAutoRotate)
-
 local function antiFall(character)
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
@@ -353,7 +330,6 @@ local function antiFall(character)
         end
     end
 end
-
 task.spawn(function()
     while true do
         if ScriptSettings.AirControlEnabled then
@@ -390,7 +366,6 @@ task.spawn(function()
         task.wait()
     end
 end)
-
 -- ======================== AUTOSPIN STYLE ========================
 local function getStyleService()
     local packages = ReplicatedStorage:FindFirstChild("Packages")
@@ -405,7 +380,6 @@ local function getStyleService()
     if not services then return nil end
     return services:FindFirstChild("StyleService")
 end
-
 local function selectSlot(slotNumber)
     local styleService = getStyleService()
     if not styleService then return false end
@@ -413,7 +387,6 @@ local function selectSlot(slotNumber)
     pcall(function() styleService.RF.SelectSlot:InvokeServer(unpack(args)) end)
     return true
 end
-
 local function performSpin(isLucky)
     local styleService = getStyleService()
     if not styleService then return false end
@@ -421,7 +394,6 @@ local function performSpin(isLucky)
     pcall(function() styleService.RF.Roll:InvokeServer(unpack(args)) end)
     return true
 end
-
 task.spawn(function()
     while true do
         if ScriptSettings.AutoSpinEnabled then
@@ -434,7 +406,6 @@ task.spawn(function()
         end
     end
 end)
-
 -- ======================== AUTOSPIN ABILITY ========================
 local function getAbilityService()
     local packages = ReplicatedStorage:FindFirstChild("Packages")
@@ -449,7 +420,6 @@ local function getAbilityService()
     if not services then return nil end
     return services:FindFirstChild("AbilityService")
 end
-
 local function selectAbilitySlot(slotNumber)
     local abilityService = getAbilityService()
     if not abilityService then return false end
@@ -457,7 +427,6 @@ local function selectAbilitySlot(slotNumber)
     pcall(function() abilityService.RF.SelectSlot:InvokeServer(unpack(args)) end)
     return true
 end
-
 local function performAbilitySpin(isLucky)
     local abilityService = getAbilityService()
     if not abilityService then return false end
@@ -465,7 +434,6 @@ local function performAbilitySpin(isLucky)
     pcall(function() abilityService.RF.Roll:InvokeServer(unpack(args)) end)
     return true
 end
-
 task.spawn(function()
     while true do
         if ScriptSettings.AutoAbilityEnabled then
@@ -478,28 +446,23 @@ task.spawn(function()
         end
     end
 end)
-
 -- ======================== LEGIT LOCK ========================
 local legitLockCooldown = false
-
 local function toggleLegitLock()
     ScriptSettings.LegitLockEnabled = not ScriptSettings.LegitLockEnabled
     notify("Legit Lock " .. (ScriptSettings.LegitLockEnabled and "ON" or "OFF"), false)
 end
-
 local function setupLegitLock(character)
     if not character then return end
     local hum = character:WaitForChild("Humanoid", 5)
     local root = character:WaitForChild("HumanoidRootPart", 5)
     if not hum or not root then return end
-
     local connection
     connection = hum.StateChanged:Connect(function(_, newState)
         if not ScriptSettings.LegitLockEnabled then return end
         if newState ~= Enum.HumanoidStateType.Jumping then return end
         if legitLockCooldown then return end
         legitLockCooldown = true
-
         task.delay(0.01 + math.random() * 0.015, function()
             if not (hum and hum.Parent and root and root.Parent) then return end
             local camLook = Camera.CFrame.LookVector
@@ -517,28 +480,22 @@ local function setupLegitLock(character)
         end)
     end)
 end
-
 if LocalPlayer.Character then setupLegitLock(LocalPlayer.Character) end
 LocalPlayer.CharacterAdded:Connect(setupLegitLock)
-
 ContextActionService:BindAction("LegitLockToggle", function(_, state, _)
     if state == Enum.UserInputState.Begin then toggleLegitLock() end
 end, false, ScriptSettings.LegitLockKey)
-
 -- ======================== GUI ========================
 local existing = CoreGui:FindFirstChild(SETTINGS.Name) or (LocalPlayer.PlayerGui and LocalPlayer.PlayerGui:FindFirstChild(SETTINGS.Name))
 if existing then existing:Destroy() end
-
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = SETTINGS.Name
 ScreenGui.ResetOnSpawn = false
 ScreenGui.DisplayOrder = 100
 if CoreGui then ScreenGui.Parent = CoreGui elseif LocalPlayer.PlayerGui then ScreenGui.Parent = LocalPlayer.PlayerGui end
-
 local screenSize = Camera.ViewportSize
 local width = math.min(screenSize.X * 0.88, 500)
 local height = math.min(screenSize.Y * 0.82, 520)
-
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, width, 0, height)
 MainFrame.Position = UDim2.new(0.5, -width/2, 0.5, -height/2)
@@ -548,7 +505,6 @@ MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 local MainCorner = Instance.new("UICorner") MainCorner.CornerRadius = UDim.new(0,10) MainCorner.Parent = MainFrame
 local MainStroke = Instance.new("UIStroke") MainStroke.Thickness = 1 MainStroke.Color = COLORS.Stroke MainStroke.Parent = MainFrame
-
 local HEADER_H = 40
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1,0,0,HEADER_H)
@@ -556,7 +512,6 @@ Header.BackgroundColor3 = COLORS.Sidebar
 Header.BorderSizePixel = 0
 Header.Parent = MainFrame
 local HeaderCorner = Instance.new("UICorner") HeaderCorner.CornerRadius = UDim.new(0,10) HeaderCorner.Parent = Header
-
 local HeaderImage = Instance.new("ImageLabel")
 HeaderImage.Size = UDim2.new(0,25,0,25)
 HeaderImage.Position = UDim2.new(0,5,0.5,-12)
@@ -564,7 +519,6 @@ HeaderImage.Image = SETTINGS.HeaderIcon
 HeaderImage.BackgroundTransparency = 1
 HeaderImage.Parent = Header
 local HeaderImageCorner = Instance.new("UICorner") HeaderImageCorner.CornerRadius = UDim.new(1,0) HeaderImageCorner.Parent = HeaderImage
-
 local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(1,-60,1,0)
 TitleLabel.Position = UDim2.new(0,35,0,0)
@@ -576,117 +530,113 @@ TitleLabel.TextSize = 15
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.TextYAlignment = Enum.TextYAlignment.Center
 TitleLabel.Parent = Header
-
 local Controls = Instance.new("Frame")
 Controls.Size = UDim2.new(0, 70, 1, 0)
 Controls.Position = UDim2.new(1, -75, 0, 0)
 Controls.BackgroundTransparency = 1
 Controls.Parent = Header
-
-local function createIconButton(parent, iconType, positionX)
+local function createIconButton(iconType, x)
     local btn = Instance.new("TextButton")
-    btn.Name = iconType .. "Btn"
     btn.Size = UDim2.new(0, 32, 0, 32)
-    btn.Position = UDim2.new(1, -40 - positionX, 0, 8)
-    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    btn.Position = UDim2.new(0, x, 0.5, -16)
+    btn.BackgroundColor3 = COLORS.Button
+    btn.BackgroundTransparency = 0
+    btn.Text = ""
     btn.BorderSizePixel = 0
-    btn.AutoButtonColor = false
-    btn.Parent = parent
-
-    local corner = Instance.new("UICorner", btn)
+    btn.ZIndex = 5
+    btn.Parent = Controls
+    local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
-
-    local iconHolder = Instance.new("Frame")
-    iconHolder.Size = UDim2.new(1, 0, 1, 0)
-    iconHolder.BackgroundTransparency = 1
-    iconHolder.Parent = btn
-
+    corner.Parent = btn
+    local iconFrame = Instance.new("Frame")
+    iconFrame.Size = UDim2.new(1, 0, 1, 0)
+    iconFrame.BackgroundTransparency = 1
+    iconFrame.ZIndex = 6
+    iconFrame.Parent = btn
     if iconType == "Close" then
         local line1 = Instance.new("Frame")
-        line1.Size = UDim2.new(0, 2, 0, 2)
-        line1.Position = UDim2.new(0.5, -1, 0.5, -1)
+        line1.Size = UDim2.new(0, 18, 0, 4)
+        line1.Position = UDim2.new(0.5, -9, 0.5, -2)
         line1.Rotation = 45
         line1.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
         line1.BorderSizePixel = 0
-        line1.Parent = iconHolder
-
+        line1.ZIndex = 7
+        line1.Parent = iconFrame
+        local corner1 = Instance.new("UICorner")
+        corner1.CornerRadius = UDim.new(0, 2)
+        corner1.Parent = line1
         local line2 = line1:Clone()
         line2.Rotation = -45
-        line2.Parent = iconHolder
-
+        line2.ZIndex = 7
+        line2.Parent = iconFrame
         btn.MouseEnter:Connect(function()
-            line1.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-            line2.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-            btn.BackgroundColor3 = Color3.fromRGB(55, 45, 45)
+            line1.BackgroundColor3 = Color3.fromRGB(255, 120, 120)
+            line2.BackgroundColor3 = Color3.fromRGB(255, 120, 120)
+            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         end)
-
         btn.MouseLeave:Connect(function()
             line1.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
             line2.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            btn.BackgroundColor3 = COLORS.Button
         end)
-
     elseif iconType == "Minimize" then
         local line = Instance.new("Frame")
-        line.Size = UDim2.new(0, 14, 0, 2)
-        line.Position = UDim2.new(0.5, -7, 0.5, 0)
+        line.Size = UDim2.new(0, 18, 0, 4)
+        line.Position = UDim2.new(0.5, -9, 0.5, 0)
         line.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
         line.BorderSizePixel = 0
-        line.Parent = iconHolder
-
+        line.ZIndex = 7
+        line.Parent = iconFrame
+        local lineCorner = Instance.new("UICorner")
+        lineCorner.CornerRadius = UDim.new(0, 2)
+        lineCorner.Parent = line
         btn.MouseEnter:Connect(function()
             line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         end)
-
         btn.MouseLeave:Connect(function()
             line.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            btn.BackgroundColor3 = COLORS.Button
         end)
     end
-
     return btn
 end
-
-local closeBtn = createIconButton(mainFrame, "Close", 0)
-local minimizeBtn = createIconButton(mainFrame, "Minimize", 40)
-
-closeBtn.MouseButton1Click:Connect(function()
-    mainFrame.Visible = false
-end)
-
-minimizeBtn.MouseButton1Click:Connect(function()
-    if mainFrame.Size.Y.Scale == 1 then
-        oldSize = mainFrame.Size
-        mainFrame:TweenSize(UDim2.new(mainFrame.Size.X.Scale, mainFrame.Size.X.Offset, 0, 40), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2)
-        for _, child in ipairs(mainFrame:GetChildren()) do
-            if child:IsA("Frame") and child.Name ~= "TopBar" then
-                child.Visible = false
-            end
-        end
+local MinBtn = createIconButton("Minimize", 43)
+local CloseBtn = createIconButton("Close", 8)
+local Body = Instance.new("Frame")
+Body.Size = UDim2.new(1,0,1,-HEADER_H)
+Body.Position = UDim2.new(0,0,0,HEADER_H)
+Body.BackgroundTransparency = 1
+Body.Parent = MainFrame
+local minimized = false
+MinBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        Body.Visible = false
+        TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, width, 0, HEADER_H)}):Play()
     else
-        mainFrame:TweenSize(oldSize or UDim2.new(0, 400, 0, 300), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2)
+        TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, width, 0, height)}):Play()
         task.wait(0.2)
-        for _, child in ipairs(mainFrame:GetChildren()) do
-            if child:IsA("Frame") and child.Name ~= "TopBar" then
-                child.Visible = true
-            end
-        end
+        Body.Visible = true
     end
+end)
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+    if ESP_Folder then ESP_Folder:Destroy() end
+    if hitboxSphere then hitboxSphere:Destroy() end
+    for _, line in pairs(tracers) do if line then line:Destroy() end end
 end)
 -- ======================== DRAGGING (MOBILE + PC FIX) ========================
 local dragging = false
 local dragInput = nil
 local dragStart = nil
 local startPos = nil
-
 local DragBar = Instance.new("TextButton")
 DragBar.Size = UDim2.new(1,-70,1,0)
 DragBar.BackgroundTransparency = 1
 DragBar.Text = ""
 DragBar.ZIndex = 10
 DragBar.Parent = Header
-
 local function updateDrag(input)
     if not dragging then return end
     local delta = input.Position - dragStart
@@ -697,7 +647,6 @@ local function updateDrag(input)
         startPos.Y.Offset + delta.Y
     )
 end
-
 DragBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
@@ -710,26 +659,22 @@ DragBar.InputBegan:Connect(function(input)
         end)
     end
 end)
-
 DragBar.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         dragInput = input
     end
 end)
-
 UserInputService.InputChanged:Connect(function(input)
     if input == dragInput and dragging then
         updateDrag(input)
     end
 end)
-
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = false
     end
 end)
 -- ======================== END DRAGGING FIX ========================
-
 -- Sidebar
 local Sidebar = Instance.new("Frame")
 Sidebar.Size = UDim2.new(0,150,1,0)
@@ -742,7 +687,6 @@ Divider.Position = UDim2.new(1,-1,0,0)
 Divider.BackgroundColor3 = COLORS.Stroke
 Divider.BorderSizePixel = 0
 Divider.Parent = Sidebar
-
 local BtnContainer = Instance.new("Frame")
 BtnContainer.Size = UDim2.new(1,0,0.85,0)
 BtnContainer.BackgroundTransparency = 1
@@ -756,7 +700,6 @@ BtnPad.PaddingTop = UDim.new(0,20)
 BtnPad.PaddingLeft = UDim.new(0,10)
 BtnPad.PaddingRight = UDim.new(0,10)
 BtnPad.Parent = BtnContainer
-
 -- SCROLLABLE SIDEBAR
 local btnScroll = Instance.new("ScrollingFrame")
 btnScroll.Size = UDim2.new(1,0,0.85,0)
@@ -773,7 +716,6 @@ btnScroll.Parent = Sidebar
 BtnContainer.Parent = btnScroll
 BtnContainer.Size = UDim2.new(1,0,0,0)
 BtnContainer.BackgroundTransparency = 1
-
 local Content = Instance.new("Frame")
 Content.Size = UDim2.new(1,-150,1,0)
 Content.Position = UDim2.new(0,150,0,0)
@@ -787,7 +729,6 @@ ContentPad.PaddingLeft = UDim.new(0,15)
 ContentPad.PaddingRight = UDim.new(0,15)
 ContentPad.PaddingBottom = UDim.new(0,15)
 ContentPad.Parent = Content
-
 -- Notifications
 local NotifFrame = Instance.new("Frame")
 NotifFrame.Size = UDim2.new(0,250,0,0)
@@ -797,7 +738,6 @@ NotifFrame.Parent = ScreenGui
 local NotifLayout = Instance.new("UIListLayout")
 NotifLayout.Padding = UDim.new(0,5)
 NotifLayout.Parent = NotifFrame
-
 local function notify(text, isClick)
     local n = Instance.new("TextLabel")
     n.Size = UDim2.new(1,0,0,25)
@@ -812,7 +752,6 @@ local function notify(text, isClick)
     local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0,6) corner.Parent = n
     task.spawn(function() task.wait(2) if n then n:Destroy() end end)
 end
-
 -- Helper functions for toggle and stepper
 local toggleRegistry = {}
 local function CreateToggle(parent, name, defaultVal, onFunc, offFunc)
@@ -822,7 +761,6 @@ local function CreateToggle(parent, name, defaultVal, onFunc, offFunc)
     container.BackgroundTransparency = 0.5
     container.Parent = parent
     local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0,6) corner.Parent = container
-
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.7,0,1,0)
     label.Position = UDim2.new(0,10,0,0)
@@ -833,7 +771,6 @@ local function CreateToggle(parent, name, defaultVal, onFunc, offFunc)
     label.TextSize = 14
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = container
-
     local sw = Instance.new("TextButton")
     sw.Text = ""
     sw.Size = UDim2.new(0,45,0,25)
@@ -843,45 +780,38 @@ local function CreateToggle(parent, name, defaultVal, onFunc, offFunc)
     sw.AutoButtonColor = false
     sw.Parent = container
     local swCorner = Instance.new("UICorner") swCorner.CornerRadius = UDim.new(1,0) swCorner.Parent = sw
-
     local handle = Instance.new("Frame")
     handle.Size = UDim2.new(0,20,0,20)
     handle.BackgroundColor3 = COLORS.Text
     handle.BorderSizePixel = 0
     handle.Parent = sw
     local hCorner = Instance.new("UICorner") hCorner.CornerRadius = UDim.new(1,0) hCorner.Parent = handle
-
     local active = defaultVal
     local posOn = UDim2.new(1,-22,0.5,-10)
     local posOff = UDim2.new(0,2,0.5,-10)
     handle.Position = active and posOn or posOff
-
     local function updateVis()
         local targetColor = active and Color3.fromRGB(50,200,50) or COLORS.Button
         local targetPos = active and posOn or posOff
         TweenService:Create(sw, TweenInfo.new(0.15), {BackgroundColor3 = targetColor}):Play()
         TweenService:Create(handle, TweenInfo.new(0.15), {Position = targetPos}):Play()
     end
-
     local function setValue(v)
         if active == v then return end
         active = v
         updateVis()
         if active then pcall(onFunc) else pcall(offFunc) end
     end
-
     sw.MouseButton1Click:Connect(function() setValue(not active) end)
     if defaultVal then updateVis() end
     toggleRegistry[name] = setValue
     return container
 end
-
 local function CreateStepper(parent, labelText, minVal, maxVal, step, defaultValue, onChange)
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1,0,0,35)
     container.BackgroundTransparency = 1
     container.Parent = parent
-
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.6,0,1,0)
     label.Position = UDim2.new(0,5,0,0)
@@ -892,7 +822,6 @@ local function CreateStepper(parent, labelText, minVal, maxVal, step, defaultVal
     label.TextSize = 12
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = container
-
     local minus = Instance.new("TextButton")
     minus.Size = UDim2.new(0,30,0,25)
     minus.Position = UDim2.new(0.65,0,0.5,-12)
@@ -902,7 +831,6 @@ local function CreateStepper(parent, labelText, minVal, maxVal, step, defaultVal
     minus.Font = Enum.Font.GothamBold
     minus.Parent = container
     local minusCorner = Instance.new("UICorner") minusCorner.CornerRadius = UDim.new(0,4) minusCorner.Parent = minus
-
     local valLabel = Instance.new("TextLabel")
     valLabel.Size = UDim2.new(0,50,0,25)
     valLabel.Position = UDim2.new(0.75,0,0.5,-12)
@@ -913,7 +841,6 @@ local function CreateStepper(parent, labelText, minVal, maxVal, step, defaultVal
     valLabel.TextSize = 12
     valLabel.Parent = container
     local valCorner = Instance.new("UICorner") valCorner.CornerRadius = UDim.new(0,4) valCorner.Parent = valLabel
-
     local plus = Instance.new("TextButton")
     plus.Size = UDim2.new(0,30,0,25)
     plus.Position = UDim2.new(0.85,0,0.5,-12)
@@ -923,9 +850,7 @@ local function CreateStepper(parent, labelText, minVal, maxVal, step, defaultVal
     plus.Font = Enum.Font.GothamBold
     plus.Parent = container
     local plusCorner = Instance.new("UICorner") plusCorner.CornerRadius = UDim.new(0,4) plusCorner.Parent = plus
-
     local current = math.clamp(defaultValue, minVal, maxVal)
-
     local function updateUI()
         if step >= 1 then
             valLabel.Text = string.format("%d", current)
@@ -934,7 +859,9 @@ local function CreateStepper(parent, labelText, minVal, maxVal, step, defaultVal
         end
         label.Text = labelText .. current
     end
-
+$ sed -n '950,1900p' /workspace/test
+sed -n '950,1900p' /workspace/test
+end
     local function setValue(v)
         v = math.clamp(v, minVal, maxVal)
         if math.abs(v - current) > 0.001 then
@@ -943,13 +870,11 @@ local function CreateStepper(parent, labelText, minVal, maxVal, step, defaultVal
             if onChange then onChange(current) end
         end
     end
-
     minus.MouseButton1Click:Connect(function() setValue(current - step) end)
     plus.MouseButton1Click:Connect(function() setValue(current + step) end)
     updateUI()
     return { setValue = setValue, getValue = function() return current end }
 end
-
 -- SCROLLABLE TABS
 local tabs = {}
 local function CreateTab(name, title)
@@ -963,7 +888,6 @@ local function CreateTab(name, title)
     btn.AutoButtonColor = false
     btn.Parent = BtnContainer
     local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0,6) corner.Parent = btn
-
     local page = Instance.new("ScrollingFrame")
     page.Size = UDim2.new(1,0,1,0)
     page.BackgroundTransparency = 1
@@ -975,22 +899,18 @@ local function CreateTab(name, title)
     page.ScrollingEnabled = true
     page.Visible = false
     page.Parent = Content
-    
     page.HorizontalScrollBarInset = Enum.ScrollBarInset.None
     page.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-    
     local pageLayout = Instance.new("UIListLayout")
     pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
     pageLayout.Padding = UDim.new(0, 8)
     pageLayout.Parent = page
-    
     local pagePadding = Instance.new("UIPadding")
     pagePadding.PaddingTop = UDim.new(0, 10)
     pagePadding.PaddingBottom = UDim.new(0, 10)
     pagePadding.PaddingLeft = UDim.new(0, 5)
     pagePadding.PaddingRight = UDim.new(0, 15)
     pagePadding.Parent = page
-
     btn.MouseButton1Click:Connect(function()
         for _, t in pairs(tabs) do
             TweenService:Create(t.btn, TweenInfo.new(0.2), {BackgroundColor3 = COLORS.Button, TextColor3 = COLORS.TextDark}):Play()
@@ -999,18 +919,15 @@ local function CreateTab(name, title)
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = COLORS.ButtonSelected, TextColor3 = COLORS.Text}):Play()
         page.Visible = true
     end)
-
     tabs[name] = {btn = btn, page = page}
     return page
 end
-
 local homeTab = CreateTab("Home", "Home")
 local espTab = CreateTab("ESP", "ESP / Wallhack")
 local hitboxTab = CreateTab("Hitbox", "Hitbox")
 local charTab = CreateTab("Character", "Character")
 local autoTab = CreateTab("Auto", "Automatization")
 local configTab = CreateTab("Config", "Config")
-
 -- Home Tab
 local welcome = Instance.new("TextLabel")
 welcome.Size = UDim2.new(1, -20, 0, 50)
@@ -1022,7 +939,6 @@ welcome.Font = Enum.Font.GothamBold
 welcome.TextSize = 20
 welcome.TextXAlignment = Enum.TextXAlignment.Center
 welcome.Parent = homeTab
-
 local inviteText = Instance.new("TextLabel")
 inviteText.Size = UDim2.new(1, -20, 0, 40)
 inviteText.Position = UDim2.new(0,10,0,70)
@@ -1034,7 +950,6 @@ inviteText.TextSize = 14
 inviteText.TextXAlignment = Enum.TextXAlignment.Center
 inviteText.TextYAlignment = Enum.TextYAlignment.Top
 inviteText.Parent = homeTab
-
 local discordBtn = Instance.new("TextButton")
 discordBtn.Size = UDim2.new(0.6,0,0,40)
 discordBtn.Position = UDim2.new(0.2,0,0,120)
@@ -1045,13 +960,11 @@ discordBtn.Font = Enum.Font.GothamBold
 discordBtn.TextSize = 14
 discordBtn.Parent = homeTab
 local discCorner = Instance.new("UICorner") discCorner.CornerRadius = UDim.new(0,8) discCorner.Parent = discordBtn
-
 local discordLink = "https://discord.gg/gKTS29RjTP"
 discordBtn.MouseButton1Click:Connect(function()
     pcall(function() game:GetService("GuiService"):OpenBrowserWindow(discordLink) end)
     if setclipboard then setclipboard(discordLink) notify("Link copied!", true) end
 end)
-
 -- ESP Tab
 CreateToggle(espTab, "Enable Wallhack / ESP", ScriptSettings.ESPEnabled,
     function()
@@ -1070,7 +983,6 @@ CreateToggle(espTab, "Enable Wallhack / ESP", ScriptSettings.ESPEnabled,
             end
         end
     end)
-
 CreateToggle(espTab, "Show Health (HP)", ScriptSettings.HPEnabled,
     function()
         ScriptSettings.HPEnabled = true
@@ -1088,11 +1000,9 @@ CreateToggle(espTab, "Show Health (HP)", ScriptSettings.HPEnabled,
             end
         end
     end)
-
 CreateToggle(espTab, "Enable Tracer", ScriptSettings.TracerEnabled,
     function() ScriptSettings.TracerEnabled = true end,
     function() ScriptSettings.TracerEnabled = false end)
-
 local tracerColorBtn = Instance.new("TextButton")
 tracerColorBtn.Size = UDim2.new(0.9,0,0,30)
 tracerColorBtn.Text = "Tracer Color"
@@ -1102,7 +1012,6 @@ tracerColorBtn.Font = Enum.Font.GothamBold
 tracerColorBtn.TextSize = 12
 tracerColorBtn.Parent = espTab
 local tracerColorCorner = Instance.new("UICorner") tracerColorCorner.CornerRadius = UDim.new(0,6) tracerColorCorner.Parent = tracerColorBtn
-
 local tracerColors = {
     {Color3.fromRGB(255,100,0), "Orange"},
     {Color3.fromRGB(255,0,0), "Red"},
@@ -1118,14 +1027,12 @@ tracerColorBtn.MouseButton1Click:Connect(function()
     ScriptSettings.TracerColor = tracerColors[tracerColorIdx][1]
     tracerColorBtn.Text = "Color: " .. tracerColors[tracerColorIdx][2]
 end)
-
 local lengthStepper = CreateStepper(espTab, "Tracer length: ", 5, 50, 1, ScriptSettings.TracerLength, function(v)
     ScriptSettings.TracerLength = v
 end)
 local thickStepper = CreateStepper(espTab, "Thickness: ", 0.1, 1, 0.05, ScriptSettings.TracerThickness, function(v)
     ScriptSettings.TracerThickness = v
 end)
-
 -- Hitbox Tab
 CreateToggle(hitboxTab, "Enable Hitbox Modification", ScriptSettings.HitboxEnabled,
     function()
@@ -1136,12 +1043,10 @@ CreateToggle(hitboxTab, "Enable Hitbox Modification", ScriptSettings.HitboxEnabl
         ScriptSettings.HitboxEnabled = false
         updateHitboxSphere()
     end)
-
 local radiusStepper = CreateStepper(hitboxTab, "Radius addition: ", 0, 38, 1, ScriptSettings.HitboxExtraSize, function(v)
     ScriptSettings.HitboxExtraSize = v
     updateHitboxSphere()
 end)
-
 CreateToggle(hitboxTab, "Show Sphere", ScriptSettings.HitboxShowSphere,
     function()
         ScriptSettings.HitboxShowSphere = true
@@ -1151,7 +1056,6 @@ CreateToggle(hitboxTab, "Show Sphere", ScriptSettings.HitboxShowSphere,
         ScriptSettings.HitboxShowSphere = false
         updateHitboxSphere()
     end)
-
 local colorBtn = Instance.new("TextButton")
 colorBtn.Size = UDim2.new(0.9,0,0,30)
 colorBtn.Text = "Sphere Color"
@@ -1161,7 +1065,6 @@ colorBtn.Font = Enum.Font.GothamBold
 colorBtn.TextSize = 12
 colorBtn.Parent = hitboxTab
 local colorCorner = Instance.new("UICorner") colorCorner.CornerRadius = UDim.new(0,6) colorCorner.Parent = colorBtn
-
 local sphereColors = {
     {Color3.fromRGB(255,0,0), "Red"},
     {Color3.fromRGB(0,255,0), "Green"},
@@ -1178,25 +1081,20 @@ colorBtn.MouseButton1Click:Connect(function()
     colorBtn.Text = "Color: " .. sphereColors[sphereColorIdx][2]
     updateHitboxSphere()
 end)
-
 local alphaStepper = CreateStepper(hitboxTab, "Transparency: ", 0, 1, 0.1, ScriptSettings.HitboxTransparency, function(v)
     ScriptSettings.HitboxTransparency = v
     updateHitboxSphere()
 end)
-
 -- Character Tab
 CreateToggle(charTab, "Move in Air (WASD)", ScriptSettings.AirControlEnabled,
     function() ScriptSettings.AirControlEnabled = true; notify("Air Control ON", false) end,
     function() ScriptSettings.AirControlEnabled = false; notify("Air Control OFF", false) end)
-
 local airSpeedStepper = CreateStepper(charTab, "Air Speed: ", 10, 80, 1, ScriptSettings.AirControlSpeed, function(v)
     ScriptSettings.AirControlSpeed = v
 end)
-
 CreateToggle(charTab, "Legit Lock (Jump turn)", ScriptSettings.LegitLockEnabled,
     function() ScriptSettings.LegitLockEnabled = true; notify("Legit Lock ON", false) end,
     function() ScriptSettings.LegitLockEnabled = false; notify("Legit Lock OFF", false) end)
-
 local legitKeyLabel = Instance.new("TextLabel")
 legitKeyLabel.Size = UDim2.new(0.9,0,0,25)
 legitKeyLabel.BackgroundTransparency = 1
@@ -1205,7 +1103,6 @@ legitKeyLabel.TextColor3 = COLORS.Text
 legitKeyLabel.Font = Enum.Font.Gotham
 legitKeyLabel.TextSize = 12
 legitKeyLabel.Parent = charTab
-
 local legitBindBtn = Instance.new("TextButton")
 legitBindBtn.Size = UDim2.new(0.5,0,0,30)
 legitBindBtn.Position = UDim2.new(0.25,0,0,0)
@@ -1216,7 +1113,6 @@ legitBindBtn.Font = Enum.Font.GothamBold
 legitBindBtn.TextSize = 12
 legitBindBtn.Parent = charTab
 local bindCorner = Instance.new("UICorner") bindCorner.CornerRadius = UDim.new(0,6) bindCorner.Parent = legitBindBtn
-
 legitBindBtn.MouseButton1Click:Connect(function()
     legitBindBtn.Text = "Press any key"
     legitBindBtn.BackgroundColor3 = Color3.fromRGB(200,100,50)
@@ -1236,12 +1132,10 @@ legitBindBtn.MouseButton1Click:Connect(function()
         end
     end)
 end)
-
 -- Automatization Tab
 CreateToggle(autoTab, "AutoSpin Style", ScriptSettings.AutoSpinEnabled,
     function() ScriptSettings.AutoSpinEnabled = true; notify("AutoSpin Style ON", false) end,
     function() ScriptSettings.AutoSpinEnabled = false; notify("AutoSpin Style OFF", false) end)
-
 local styleTypeLabel = Instance.new("TextLabel")
 styleTypeLabel.Size = UDim2.new(0.9,0,0,25)
 styleTypeLabel.BackgroundTransparency = 1
@@ -1250,7 +1144,6 @@ styleTypeLabel.TextColor3 = COLORS.Text
 styleTypeLabel.Font = Enum.Font.Gotham
 styleTypeLabel.TextSize = 13
 styleTypeLabel.Parent = autoTab
-
 local styleTypeBtn = Instance.new("TextButton")
 styleTypeBtn.Size = UDim2.new(0.5,0,0,25)
 styleTypeBtn.Position = UDim2.new(0.25,0,0,0)
@@ -1261,13 +1154,11 @@ styleTypeBtn.Font = Enum.Font.GothamBold
 styleTypeBtn.TextSize = 12
 styleTypeBtn.Parent = autoTab
 local styleBtnCorner = Instance.new("UICorner") styleBtnCorner.CornerRadius = UDim.new(0,6) styleBtnCorner.Parent = styleTypeBtn
-
 styleTypeBtn.MouseButton1Click:Connect(function()
     ScriptSettings.AutoSpinType = not ScriptSettings.AutoSpinType
     styleTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoSpinType and "Lucky" or "Regular")
     notify("Style spin type changed", true)
 end)
-
 local styleSlotLabel = Instance.new("TextLabel")
 styleSlotLabel.Size = UDim2.new(0.9,0,0,25)
 styleSlotLabel.Position = UDim2.new(0,0,0,35)
@@ -1277,17 +1168,14 @@ styleSlotLabel.TextColor3 = COLORS.Text
 styleSlotLabel.Font = Enum.Font.Gotham
 styleSlotLabel.TextSize = 13
 styleSlotLabel.Parent = autoTab
-
 local function updateStyleSlotLabel()
     styleSlotLabel.Text = "Selected slot: " .. ScriptSettings.AutoSpinSlot
 end
-
 local styleSlotContainer = Instance.new("Frame")
 styleSlotContainer.Size = UDim2.new(1,0,0,35)
 styleSlotContainer.Position = UDim2.new(0,0,0,60)
 styleSlotContainer.BackgroundTransparency = 1
 styleSlotContainer.Parent = autoTab
-
 for i = 1, 4 do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.2, -5, 0, 30)
@@ -1299,7 +1187,6 @@ for i = 1, 4 do
     btn.TextSize = 14
     btn.Parent = styleSlotContainer
     local btnCorner = Instance.new("UICorner") btnCorner.CornerRadius = UDim.new(0,6) btnCorner.Parent = btn
-
     btn.MouseButton1Click:Connect(function()
         ScriptSettings.AutoSpinSlot = i
         updateStyleSlotLabel()
@@ -1312,12 +1199,10 @@ for i = 1, 4 do
         notify("Style slot " .. i .. " selected", true)
     end)
 end
-
 local sep = Instance.new("Frame")
 sep.Size = UDim2.new(1,0,0,15)
 sep.BackgroundTransparency = 1
 sep.Parent = autoTab
-
 local abilityTitle = Instance.new("TextLabel")
 abilityTitle.Size = UDim2.new(1,0,0,25)
 abilityTitle.BackgroundTransparency = 1
@@ -1327,7 +1212,6 @@ abilityTitle.Font = Enum.Font.GothamBold
 abilityTitle.TextSize = 16
 abilityTitle.TextXAlignment = Enum.TextXAlignment.Center
 abilityTitle.Parent = autoTab
-
 CreateToggle(autoTab, "AutoSpin Ability", ScriptSettings.AutoAbilityEnabled,
     function()
         ScriptSettings.AutoAbilityEnabled = true
@@ -1337,7 +1221,6 @@ CreateToggle(autoTab, "AutoSpin Ability", ScriptSettings.AutoAbilityEnabled,
         ScriptSettings.AutoAbilityEnabled = false
         notify("AutoSpin Ability OFF", false)
     end)
-
 local abilityTypeLabel = Instance.new("TextLabel")
 abilityTypeLabel.Size = UDim2.new(0.9,0,0,25)
 abilityTypeLabel.BackgroundTransparency = 1
@@ -1346,7 +1229,6 @@ abilityTypeLabel.TextColor3 = COLORS.Text
 abilityTypeLabel.Font = Enum.Font.Gotham
 abilityTypeLabel.TextSize = 13
 abilityTypeLabel.Parent = autoTab
-
 local abilityTypeBtn = Instance.new("TextButton")
 abilityTypeBtn.Size = UDim2.new(0.5,0,0,25)
 abilityTypeBtn.Position = UDim2.new(0.25,0,0,0)
@@ -1357,13 +1239,11 @@ abilityTypeBtn.Font = Enum.Font.GothamBold
 abilityTypeBtn.TextSize = 12
 abilityTypeBtn.Parent = autoTab
 local abilityBtnCorner = Instance.new("UICorner") abilityBtnCorner.CornerRadius = UDim.new(0,6) abilityBtnCorner.Parent = abilityTypeBtn
-
 abilityTypeBtn.MouseButton1Click:Connect(function()
     ScriptSettings.AutoAbilityType = not ScriptSettings.AutoAbilityType
     abilityTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoAbilityType and "Lucky" or "Regular")
     notify("Ability spin type changed", true)
 end)
-
 local abilitySlotLabel = Instance.new("TextLabel")
 abilitySlotLabel.Size = UDim2.new(0.9,0,0,25)
 abilitySlotLabel.Position = UDim2.new(0,0,0,35)
@@ -1373,17 +1253,14 @@ abilitySlotLabel.TextColor3 = COLORS.Text
 abilitySlotLabel.Font = Enum.Font.Gotham
 abilitySlotLabel.TextSize = 13
 abilitySlotLabel.Parent = autoTab
-
 local function updateAbilitySlotLabel()
     abilitySlotLabel.Text = "Selected slot: " .. ScriptSettings.AutoAbilitySlot
 end
-
 local abilitySlotContainer = Instance.new("Frame")
 abilitySlotContainer.Size = UDim2.new(1,0,0,35)
 abilitySlotContainer.Position = UDim2.new(0,0,0,60)
 abilitySlotContainer.BackgroundTransparency = 1
 abilitySlotContainer.Parent = autoTab
-
 for i = 1, 4 do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.2, -5, 0, 30)
@@ -1395,7 +1272,6 @@ for i = 1, 4 do
     btn.TextSize = 14
     btn.Parent = abilitySlotContainer
     local btnCorner = Instance.new("UICorner") btnCorner.CornerRadius = UDim.new(0,6) btnCorner.Parent = btn
-
     btn.MouseButton1Click:Connect(function()
         ScriptSettings.AutoAbilitySlot = i
         updateAbilitySlotLabel()
@@ -1408,49 +1284,35 @@ for i = 1, 4 do
         notify("Ability slot " .. i .. " selected", true)
     end)
 end
-
--- CONFIG SYSTEM - REWRITTEN FOR RELIABILITY
+-- CONFIG SYSTEM
 local useFS = pcall(function() return isfolder and makefolder and listfiles and writefile and readfile and delfile end)
 local globalCfgs = getgenv()._Fer4ixzConfigs or {}
 getgenv()._Fer4ixzConfigs = globalCfgs
-
-local ConfigFolder = "Fer4ixzConfigs"
-
--- Helper to ensure folder exists
-local function ensureFolder()
-    if useFS and not isfolder(ConfigFolder) then
-        makefolder(ConfigFolder)
-    end
-end
-
 local function saveCfg(name, data)
-    ensureFolder()
     if useFS then
-        return pcall(writefile, ConfigFolder.."/"..name..".json", HttpService:JSONEncode(data))
+        local folder = "Fer4ixzConfigs"
+        if not isfolder(folder) then makefolder(folder) end
+        return pcall(writefile, folder.."/"..name..".json", HttpService:JSONEncode(data))
     else
         globalCfgs[name] = data
         return true
     end
 end
-
 local function loadCfg(name)
     if useFS then
-        ensureFolder()
-        local ok, cont = pcall(readfile, ConfigFolder.."/"..name..".json")
-        if ok and cont then 
-            local success, decoded = pcall(HttpService.JSONDecode, HttpService, cont)
-            if success then return decoded end
-        end
+        local folder = "Fer4ixzConfigs"
+        local ok, cont = pcall(readfile, folder.."/"..name..".json")
+        if ok and cont then return HttpService:JSONDecode(cont) end
         return nil
     else
         return globalCfgs[name]
     end
 end
-
 local function listCfgs()
     if useFS then
-        ensureFolder()
-        local files = listfiles(ConfigFolder)
+        local folder = "Fer4ixzConfigs"
+        if not isfolder(folder) then return {} end
+        local files = listfiles(folder)
         local names = {}
         for _, f in ipairs(files) do
             local n = f:match("([^/\\]+)%.json$")
@@ -1463,26 +1325,22 @@ local function listCfgs()
         return names
     end
 end
-
 local function delCfg(name)
     if useFS then
-        ensureFolder()
-        return pcall(delfile, ConfigFolder.."/"..name..".json")
+        local folder = "Fer4ixzConfigs"
+        return pcall(delfile, folder.."/"..name..".json")
     else
         globalCfgs[name] = nil
         return true
     end
 end
-
 local function getAuto()
     if useFS then
-        ensureFolder()
-        if isfile(ConfigFolder.."/autoload.txt") then
-            local n = readfile(ConfigFolder.."/autoload.txt"):gsub("%s+", "")
+        local folder = "Fer4ixzConfigs"
+        if isfolder(folder) and isfile(folder.."/autoload.txt") then
+            local n = readfile(folder.."/autoload.txt"):gsub("\n","")
             if n ~= "" then
-                for _, c in ipairs(listCfgs()) do 
-                    if c == n then return n end 
-                end
+                for _, c in ipairs(listCfgs()) do if c == n then return n end end
             end
         end
         return nil
@@ -1490,37 +1348,34 @@ local function getAuto()
         return getgenv()._Fer4ixzAutoload
     end
 end
-
 local function setAuto(name)
-    ensureFolder()
     if useFS then
-        writefile(ConfigFolder.."/autoload.txt", name)
+        local folder = "Fer4ixzConfigs"
+        if not isfolder(folder) then makefolder(folder) end
+        writefile(folder.."/autoload.txt", name)
     else
         getgenv()._Fer4ixzAutoload = name
     end
 end
-
 local function delAuto()
     if useFS then
-        if isfile(ConfigFolder.."/autoload.txt") then 
-            pcall(delfile, ConfigFolder.."/autoload.txt") 
-        end
+        local folder = "Fer4ixzConfigs"
+        if isfolder(folder) and isfile(folder.."/autoload.txt") then delfile(folder.."/autoload.txt") end
     else
         getgenv()._Fer4ixzAutoload = nil
     end
 end
-
--- Serialize current ScriptSettings to config data
-local function serializeConfigData()
-    return {
+local function createConfig(name)
+    if name == nil or name == "" then return false end
+    local data = {
         ESPEnabled = ScriptSettings.ESPEnabled,
         HPEnabled = ScriptSettings.HPEnabled,
         HitboxEnabled = ScriptSettings.HitboxEnabled,
         HitboxExtraSize = ScriptSettings.HitboxExtraSize,
         HitboxShowSphere = ScriptSettings.HitboxShowSphere,
-        HitboxColorR = math.floor(ScriptSettings.HitboxColor.R * 255 + 0.5),
-        HitboxColorG = math.floor(ScriptSettings.HitboxColor.G * 255 + 0.5),
-        HitboxColorB = math.floor(ScriptSettings.HitboxColor.B * 255 + 0.5),
+        HitboxColorR = ScriptSettings.HitboxColor.R,
+        HitboxColorG = ScriptSettings.HitboxColor.G,
+        HitboxColorB = ScriptSettings.HitboxColor.B,
         HitboxTransparency = ScriptSettings.HitboxTransparency,
         AirControlEnabled = ScriptSettings.AirControlEnabled,
         AirControlSpeed = ScriptSettings.AirControlSpeed,
@@ -1531,66 +1386,43 @@ local function serializeConfigData()
         AutoAbilityType = ScriptSettings.AutoAbilityType,
         AutoAbilitySlot = ScriptSettings.AutoAbilitySlot,
         TracerEnabled = ScriptSettings.TracerEnabled,
-        TracerColorR = math.floor(ScriptSettings.TracerColor.R * 255 + 0.5),
-        TracerColorG = math.floor(ScriptSettings.TracerColor.G * 255 + 0.5),
-        TracerColorB = math.floor(ScriptSettings.TracerColor.B * 255 + 0.5),
+        TracerColorR = ScriptSettings.TracerColor.R,
+        TracerColorG = ScriptSettings.TracerColor.G,
+        TracerColorB = ScriptSettings.TracerColor.B,
         TracerLength = ScriptSettings.TracerLength,
         TracerThickness = ScriptSettings.TracerThickness,
         LegitLockEnabled = ScriptSettings.LegitLockEnabled,
-        LegitLockKeyCode = tostring(ScriptSettings.LegitLockKey):gsub("Enum.KeyCode.", "")
+        LegitLockKeyCode = ScriptSettings.LegitLockKey.Value
     }
-end
-
-local function createConfig(name)
-    if name == nil or name:gsub("^%s*(.-)%s*$", "%1") == "" then return false end
-    local data = serializeConfigData()
     return saveCfg(name, data)
 end
-
 -- 🔥 ИСПРАВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ КОНФИГА
 local function loadConfig(name)
     local data = loadCfg(name)
     if not data then return false end
-    
-    ScriptSettings.ESPEnabled = data.ESPEnabled == true
-    ScriptSettings.HPEnabled = data.HPEnabled == true
-    ScriptSettings.HitboxEnabled = data.HitboxEnabled == true
-    ScriptSettings.HitboxExtraSize = type(data.HitboxExtraSize) == "number" and data.HitboxExtraSize or 0
-    ScriptSettings.HitboxShowSphere = data.HitboxShowSphere == true
-    ScriptSettings.HitboxColor = Color3.fromRGB(
-        type(data.HitboxColorR) == "number" and math.clamp(math.floor(data.HitboxColorR), 0, 255) or 255,
-        type(data.HitboxColorG) == "number" and math.clamp(math.floor(data.HitboxColorG), 0, 255) or 0,
-        type(data.HitboxColorB) == "number" and math.clamp(math.floor(data.HitboxColorB), 0, 255) or 0
-    )
-    ScriptSettings.HitboxTransparency = type(data.HitboxTransparency) == "number" and math.clamp(data.HitboxTransparency, 0, 1) or 0.7
-    ScriptSettings.AirControlEnabled = data.AirControlEnabled == true
-    ScriptSettings.AirControlSpeed = type(data.AirControlSpeed) == "number" and data.AirControlSpeed or 30
-    ScriptSettings.AutoSpinEnabled = data.AutoSpinEnabled == true
-    ScriptSettings.AutoSpinType = data.AutoSpinType == true
-    ScriptSettings.AutoSpinSlot = type(data.AutoSpinSlot) == "number" and math.clamp(data.AutoSpinSlot, 1, 3) or 1
-    ScriptSettings.AutoAbilityEnabled = data.AutoAbilityEnabled == true
-    ScriptSettings.AutoAbilityType = data.AutoAbilityType == true
-    ScriptSettings.AutoAbilitySlot = type(data.AutoAbilitySlot) == "number" and math.clamp(data.AutoAbilitySlot, 1, 3) or 1
-    ScriptSettings.TracerEnabled = data.TracerEnabled == true
-    ScriptSettings.TracerColor = Color3.fromRGB(
-        type(data.TracerColorR) == "number" and math.clamp(math.floor(data.TracerColorR), 0, 255) or 255,
-        type(data.TracerColorG) == "number" and math.clamp(math.floor(data.TracerColorG), 0, 255) or 100,
-        type(data.TracerColorB) == "number" and math.clamp(math.floor(data.TracerColorB), 0, 255) or 0
-    )
-    ScriptSettings.TracerLength = type(data.TracerLength) == "number" and data.TracerLength or 15
-    ScriptSettings.TracerThickness = type(data.TracerThickness) == "number" and data.TracerThickness or 0.3
-    ScriptSettings.LegitLockEnabled = data.LegitLockEnabled == true
-    
-    -- Обработка клавиши LegitLock (строка или Enum.KeyCode)
+    ScriptSettings.ESPEnabled = data.ESPEnabled
+    ScriptSettings.HPEnabled = data.HPEnabled
+    ScriptSettings.HitboxEnabled = data.HitboxEnabled
+    ScriptSettings.HitboxExtraSize = data.HitboxExtraSize or 0
+    ScriptSettings.HitboxShowSphere = data.HitboxShowSphere
+    ScriptSettings.HitboxColor = Color3.fromRGB(data.HitboxColorR or 255, data.HitboxColorG or 0, data.HitboxColorB or 0)
+    ScriptSettings.HitboxTransparency = data.HitboxTransparency or 0.7
+    ScriptSettings.AirControlEnabled = data.AirControlEnabled
+    ScriptSettings.AirControlSpeed = data.AirControlSpeed or 30
+    ScriptSettings.AutoSpinEnabled = data.AutoSpinEnabled
+    ScriptSettings.AutoSpinType = data.AutoSpinType
+    ScriptSettings.AutoSpinSlot = data.AutoSpinSlot or 1
+    ScriptSettings.AutoAbilityEnabled = data.AutoAbilityEnabled
+    ScriptSettings.AutoAbilityType = data.AutoAbilityType
+    ScriptSettings.AutoAbilitySlot = data.AutoAbilitySlot or 1
+    ScriptSettings.TracerEnabled = data.TracerEnabled
+    ScriptSettings.TracerColor = Color3.fromRGB(data.TracerColorR or 255, data.TracerColorG or 100, data.TracerColorB or 0)
+    ScriptSettings.TracerLength = data.TracerLength or 15
+    ScriptSettings.TracerThickness = data.TracerThickness or 0.3
+    ScriptSettings.LegitLockEnabled = data.LegitLockEnabled
     if data.LegitLockKeyCode then
-        local keyCode = data.LegitLockKeyCode
-        -- Если это Enum.KeyCode, конвертируем в строку
-        if typeof(keyCode) == "EnumItem" then
-            keyCode = tostring(keyCode):gsub("Enum.KeyCode.", "")
-        end
-        ScriptSettings.LegitLockKey = Enum.KeyCode[keyCode] or Enum.KeyCode.L
+        ScriptSettings.LegitLockKey = Enum.KeyCode[data.LegitLockKeyCode] or Enum.KeyCode.L
     end
-
     -- Обновление переключателей
     if toggleRegistry["Enable Wallhack / ESP"] then toggleRegistry["Enable Wallhack / ESP"](ScriptSettings.ESPEnabled) end
     if toggleRegistry["Show Health (HP)"] then toggleRegistry["Show Health (HP)"](ScriptSettings.HPEnabled) end
@@ -1601,14 +1433,12 @@ local function loadConfig(name)
     if toggleRegistry["AutoSpin Ability"] then toggleRegistry["AutoSpin Ability"](ScriptSettings.AutoAbilityEnabled) end
     if toggleRegistry["Enable Tracer"] then toggleRegistry["Enable Tracer"](ScriptSettings.TracerEnabled) end
     if toggleRegistry["Legit Lock (Jump turn)"] then toggleRegistry["Legit Lock (Jump turn)"](ScriptSettings.LegitLockEnabled) end
-
     -- Обновление слайдеров
     if radiusStepper and radiusStepper.setValue then radiusStepper.setValue(ScriptSettings.HitboxExtraSize) end
     if alphaStepper and alphaStepper.setValue then alphaStepper.setValue(ScriptSettings.HitboxTransparency) end
     if airSpeedStepper and airSpeedStepper.setValue then airSpeedStepper.setValue(ScriptSettings.AirControlSpeed) end
     if lengthStepper and lengthStepper.setValue then lengthStepper.setValue(ScriptSettings.TracerLength) end
     if thickStepper and thickStepper.setValue then thickStepper.setValue(ScriptSettings.TracerThickness) end
-
     -- Обновление текста кнопок цветов
     for i, col in ipairs(sphereColors) do
         if col[1] == ScriptSettings.HitboxColor then
@@ -1624,15 +1454,12 @@ local function loadConfig(name)
             break
         end
     end
-
     -- Обновление текста типа спина
     if styleTypeLabel then styleTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoSpinType and "Lucky" or "Regular") end
     if abilityTypeLabel then abilityTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoAbilityType and "Lucky" or "Regular") end
-
     -- Обновление слотов (визуал)
     updateStyleSlotLabel()
     updateAbilitySlotLabel()
-    
     if styleSlotContainer then
         for _, btn in ipairs(styleSlotContainer:GetChildren()) do
             if btn:IsA("TextButton") then
@@ -1649,7 +1476,6 @@ local function loadConfig(name)
             end
         end
     end
-
     -- Обновление ключа легит лока
     if legitKeyLabel then
         legitKeyLabel.Text = "Toggle key: " .. tostring(ScriptSettings.LegitLockKey):gsub("Enum.KeyCode.", "")
@@ -1658,19 +1484,15 @@ local function loadConfig(name)
     ContextActionService:BindAction("LegitLockToggle", function(_, state, _)
         if state == Enum.UserInputState.Begin then toggleLegitLock() end
     end, false, ScriptSettings.LegitLockKey)
-
     -- Применение настроек
     ESP_Settings.ESPEnabled = ScriptSettings.ESPEnabled
     ESP_Settings.HPEnabled = ScriptSettings.HPEnabled
     UpdateESP()
     updateHitboxSphere()
-    
     return true
 end
-
 local autoStart = getAuto()
 if autoStart then pcall(loadConfig, autoStart) end
-
 -- Config Tab UI
 local nameBox = Instance.new("TextBox")
 nameBox.Size = UDim2.new(1,0,0,30)
@@ -1680,7 +1502,6 @@ nameBox.TextColor3 = COLORS.Text
 nameBox.Font = Enum.Font.Gotham
 nameBox.TextSize = 14
 nameBox.Parent = configTab
-
 local createBtn = Instance.new("TextButton")
 createBtn.Size = UDim2.new(1,0,0,30)
 createBtn.Text = "Create Config"
@@ -1701,7 +1522,6 @@ createBtn.MouseButton1Click:Connect(function()
         notify("Save failed", true)
     end
 end)
-
 local listFrame = Instance.new("ScrollingFrame")
 listFrame.Size = UDim2.new(1,0,0,120)
 listFrame.BackgroundColor3 = COLORS.Sidebar
@@ -1717,7 +1537,6 @@ local listPad = Instance.new("UIPadding")
 listPad.PaddingTop = UDim.new(0,5)
 listPad.PaddingLeft = UDim.new(0,5)
 listPad.Parent = listFrame
-
 local selectedLabel = Instance.new("TextLabel")
 selectedLabel.Size = UDim2.new(1,0,0,25)
 selectedLabel.BackgroundColor3 = COLORS.Sidebar
@@ -1728,7 +1547,6 @@ selectedLabel.Font = Enum.Font.Gotham
 selectedLabel.TextSize = 13
 selectedLabel.Parent = configTab
 local selCorner = Instance.new("UICorner") selCorner.CornerRadius = UDim.new(0,4) selCorner.Parent = selectedLabel
-
 local loadBtn = Instance.new("TextButton")
 loadBtn.Size = UDim2.new(1,0,0,30)
 loadBtn.Text = "Load Selected Config"
@@ -1738,12 +1556,10 @@ loadBtn.Font = Enum.Font.GothamBold
 loadBtn.TextSize = 14
 loadBtn.Parent = configTab
 local loadCorner = Instance.new("UICorner") loadCorner.CornerRadius = UDim.new(0,6) loadCorner.Parent = loadBtn
-
 local autoContainer = Instance.new("Frame")
 autoContainer.Size = UDim2.new(1,0,0,30)
 autoContainer.BackgroundTransparency = 1
 autoContainer.Parent = configTab
-
 local setAutoBtn = Instance.new("TextButton")
 setAutoBtn.Size = UDim2.new(0.48,0,1,0)
 setAutoBtn.Position = UDim2.new(0,0,0,0)
@@ -1754,7 +1570,6 @@ setAutoBtn.Font = Enum.Font.GothamBold
 setAutoBtn.TextSize = 13
 setAutoBtn.Parent = autoContainer
 local setCorner = Instance.new("UICorner") setCorner.CornerRadius = UDim.new(0,6) setCorner.Parent = setAutoBtn
-
 local delAutoBtn = Instance.new("TextButton")
 delAutoBtn.Size = UDim2.new(0.48,0,1,0)
 delAutoBtn.Position = UDim2.new(0.52,0,0,0)
@@ -1765,7 +1580,6 @@ delAutoBtn.Font = Enum.Font.GothamBold
 delAutoBtn.TextSize = 13
 delAutoBtn.Parent = autoContainer
 local delCorner = Instance.new("UICorner") delCorner.CornerRadius = UDim.new(0,6) delCorner.Parent = delAutoBtn
-
 local delConfigBtn = Instance.new("TextButton")
 delConfigBtn.Size = UDim2.new(1,0,0,30)
 delConfigBtn.Text = "Delete Selected Config"
@@ -1775,7 +1589,6 @@ delConfigBtn.Font = Enum.Font.GothamBold
 delConfigBtn.TextSize = 14
 delConfigBtn.Parent = configTab
 local delCfgCorner = Instance.new("UICorner") delCfgCorner.CornerRadius = UDim.new(0,6) delCfgCorner.Parent = delConfigBtn
-
 nameBox.LayoutOrder = 1
 createBtn.LayoutOrder = 2
 listFrame.LayoutOrder = 3
@@ -1783,9 +1596,7 @@ selectedLabel.LayoutOrder = 4
 loadBtn.LayoutOrder = 5
 autoContainer.LayoutOrder = 6
 delConfigBtn.LayoutOrder = 7
-
 local selectedConfig = nil
-
 function refreshList()
     for _, ch in ipairs(listFrame:GetChildren()) do
         if ch:IsA("TextButton") then ch:Destroy() end
@@ -1822,7 +1633,6 @@ function refreshList()
         end
     end
 end
-
 loadBtn.MouseButton1Click:Connect(function()
     if selectedConfig then
         if loadConfig(selectedConfig) then
@@ -1835,7 +1645,6 @@ loadBtn.MouseButton1Click:Connect(function()
         notify("Select a config", true)
     end
 end)
-
 setAutoBtn.MouseButton1Click:Connect(function()
     if selectedConfig then
         setAuto(selectedConfig)
@@ -1845,13 +1654,11 @@ setAutoBtn.MouseButton1Click:Connect(function()
         notify("Select a config", true)
     end
 end)
-
 delAutoBtn.MouseButton1Click:Connect(function()
     delAuto()
     notify("Autoload removed", true)
     refreshList()
 end)
-
 delConfigBtn.MouseButton1Click:Connect(function()
     if selectedConfig then
         if delCfg(selectedConfig) then
@@ -1867,9 +1674,7 @@ delConfigBtn.MouseButton1Click:Connect(function()
         notify("Select a config", true)
     end
 end)
-
 refreshList()
-
 -- Profile
 local Profile = Instance.new("Frame")
 Profile.Size = UDim2.new(1,0,0,50)
@@ -1893,13 +1698,11 @@ ProfName.Font = Enum.Font.GothamBold
 ProfName.TextSize = 14
 ProfName.TextXAlignment = Enum.TextXAlignment.Left
 ProfName.Parent = Profile
-
 -- Activate first tab (Home)
 if tabs["Home"] then
     TweenService:Create(tabs["Home"].btn, TweenInfo.new(0.2), {BackgroundColor3 = COLORS.ButtonSelected, TextColor3 = COLORS.Text}):Play()
     tabs["Home"].page.Visible = true
 end
-
 -- Toggle menu
 UserInputService.InputBegan:Connect(function(inp, gp)
     if gp then return end
@@ -1907,12 +1710,10 @@ UserInputService.InputBegan:Connect(function(inp, gp)
         MainFrame.Visible = not MainFrame.Visible
     end
 end)
-
 -- Cleanup
 ScreenGui.Destroying:Connect(function()
     if ESP_Folder then ESP_Folder:Destroy() end
     if hitboxSphere then hitboxSphere:Destroy() end
     for _, line in pairs(tracers) do if line then line:Destroy() end end
 end)
-
 print("✅ Volleyball Legends Script V28 fully loaded. Press RightShift to open menu.")
