@@ -1363,16 +1363,24 @@ for i = 1, 4 do
     end)
 end
 
--- CONFIG SYSTEM
+-- CONFIG SYSTEM - REWRITTEN FOR RELIABILITY
 local useFS = pcall(function() return isfolder and makefolder and listfiles and writefile and readfile and delfile end)
 local globalCfgs = getgenv()._Fer4ixzConfigs or {}
 getgenv()._Fer4ixzConfigs = globalCfgs
 
+local ConfigFolder = "Fer4ixzConfigs"
+
+-- Helper to ensure folder exists
+local function ensureFolder()
+    if useFS and not isfolder(ConfigFolder) then
+        makefolder(ConfigFolder)
+    end
+end
+
 local function saveCfg(name, data)
+    ensureFolder()
     if useFS then
-        local folder = "Fer4ixzConfigs"
-        if not isfolder(folder) then makefolder(folder) end
-        return pcall(writefile, folder.."/"..name..".json", HttpService:JSONEncode(data))
+        return pcall(writefile, ConfigFolder.."/"..name..".json", HttpService:JSONEncode(data))
     else
         globalCfgs[name] = data
         return true
@@ -1381,9 +1389,12 @@ end
 
 local function loadCfg(name)
     if useFS then
-        local folder = "Fer4ixzConfigs"
-        local ok, cont = pcall(readfile, folder.."/"..name..".json")
-        if ok and cont then return HttpService:JSONDecode(cont) end
+        ensureFolder()
+        local ok, cont = pcall(readfile, ConfigFolder.."/"..name..".json")
+        if ok and cont then 
+            local success, decoded = pcall(HttpService.JSONDecode, HttpService, cont)
+            if success then return decoded end
+        end
         return nil
     else
         return globalCfgs[name]
@@ -1392,9 +1403,8 @@ end
 
 local function listCfgs()
     if useFS then
-        local folder = "Fer4ixzConfigs"
-        if not isfolder(folder) then return {} end
-        local files = listfiles(folder)
+        ensureFolder()
+        local files = listfiles(ConfigFolder)
         local names = {}
         for _, f in ipairs(files) do
             local n = f:match("([^/\\]+)%.json$")
@@ -1410,8 +1420,8 @@ end
 
 local function delCfg(name)
     if useFS then
-        local folder = "Fer4ixzConfigs"
-        return pcall(delfile, folder.."/"..name..".json")
+        ensureFolder()
+        return pcall(delfile, ConfigFolder.."/"..name..".json")
     else
         globalCfgs[name] = nil
         return true
@@ -1420,11 +1430,13 @@ end
 
 local function getAuto()
     if useFS then
-        local folder = "Fer4ixzConfigs"
-        if isfolder(folder) and isfile(folder.."/autoload.txt") then
-            local n = readfile(folder.."/autoload.txt"):gsub("\n","")
+        ensureFolder()
+        if isfile(ConfigFolder.."/autoload.txt") then
+            local n = readfile(ConfigFolder.."/autoload.txt"):gsub("%s+", "")
             if n ~= "" then
-                for _, c in ipairs(listCfgs()) do if c == n then return n end end
+                for _, c in ipairs(listCfgs()) do 
+                    if c == n then return n end 
+                end
             end
         end
         return nil
@@ -1434,10 +1446,9 @@ local function getAuto()
 end
 
 local function setAuto(name)
+    ensureFolder()
     if useFS then
-        local folder = "Fer4ixzConfigs"
-        if not isfolder(folder) then makefolder(folder) end
-        writefile(folder.."/autoload.txt", name)
+        writefile(ConfigFolder.."/autoload.txt", name)
     else
         getgenv()._Fer4ixzAutoload = name
     end
@@ -1445,16 +1456,17 @@ end
 
 local function delAuto()
     if useFS then
-        local folder = "Fer4ixzConfigs"
-        if isfolder(folder) and isfile(folder.."/autoload.txt") then delfile(folder.."/autoload.txt") end
+        if isfile(ConfigFolder.."/autoload.txt") then 
+            pcall(delfile, ConfigFolder.."/autoload.txt") 
+        end
     else
         getgenv()._Fer4ixzAutoload = nil
     end
 end
 
-local function createConfig(name)
-    if name == nil or name == "" then return false end
-    local data = {
+-- Serialize current ScriptSettings to config data
+local function serializeConfigData()
+    return {
         ESPEnabled = ScriptSettings.ESPEnabled,
         HPEnabled = ScriptSettings.HPEnabled,
         HitboxEnabled = ScriptSettings.HitboxEnabled,
@@ -1479,8 +1491,13 @@ local function createConfig(name)
         TracerLength = ScriptSettings.TracerLength,
         TracerThickness = ScriptSettings.TracerThickness,
         LegitLockEnabled = ScriptSettings.LegitLockEnabled,
-        LegitLockKeyCode = ScriptSettings.LegitLockKey.Value
+        LegitLockKeyCode = tostring(ScriptSettings.LegitLockKey):gsub("Enum.KeyCode.", "")
     }
+end
+
+local function createConfig(name)
+    if name == nil or name:gsub("^%s*(.-)%s*$", "%1") == "" then return false end
+    local data = serializeConfigData()
     return saveCfg(name, data)
 end
 
@@ -1489,28 +1506,43 @@ local function loadConfig(name)
     local data = loadCfg(name)
     if not data then return false end
     
-    ScriptSettings.ESPEnabled = data.ESPEnabled
-    ScriptSettings.HPEnabled = data.HPEnabled
-    ScriptSettings.HitboxEnabled = data.HitboxEnabled
-    ScriptSettings.HitboxExtraSize = data.HitboxExtraSize or 0
-    ScriptSettings.HitboxShowSphere = data.HitboxShowSphere
-    ScriptSettings.HitboxColor = Color3.fromRGB(data.HitboxColorR or 255, data.HitboxColorG or 0, data.HitboxColorB or 0)
-    ScriptSettings.HitboxTransparency = data.HitboxTransparency or 0.7
-    ScriptSettings.AirControlEnabled = data.AirControlEnabled
-    ScriptSettings.AirControlSpeed = data.AirControlSpeed or 30
-    ScriptSettings.AutoSpinEnabled = data.AutoSpinEnabled
-    ScriptSettings.AutoSpinType = data.AutoSpinType
-    ScriptSettings.AutoSpinSlot = data.AutoSpinSlot or 1
-    ScriptSettings.AutoAbilityEnabled = data.AutoAbilityEnabled
-    ScriptSettings.AutoAbilityType = data.AutoAbilityType
-    ScriptSettings.AutoAbilitySlot = data.AutoAbilitySlot or 1
-    ScriptSettings.TracerEnabled = data.TracerEnabled
-    ScriptSettings.TracerColor = Color3.fromRGB(data.TracerColorR or 255, data.TracerColorG or 100, data.TracerColorB or 0)
-    ScriptSettings.TracerLength = data.TracerLength or 15
-    ScriptSettings.TracerThickness = data.TracerThickness or 0.3
-    ScriptSettings.LegitLockEnabled = data.LegitLockEnabled
+    ScriptSettings.ESPEnabled = data.ESPEnabled == true
+    ScriptSettings.HPEnabled = data.HPEnabled == true
+    ScriptSettings.HitboxEnabled = data.HitboxEnabled == true
+    ScriptSettings.HitboxExtraSize = type(data.HitboxExtraSize) == "number" and data.HitboxExtraSize or 0
+    ScriptSettings.HitboxShowSphere = data.HitboxShowSphere == true
+    ScriptSettings.HitboxColor = Color3.fromRGB(
+        type(data.HitboxColorR) == "number" and math.clamp(data.HitboxColorR, 0, 255) or 255,
+        type(data.HitboxColorG) == "number" and math.clamp(data.HitboxColorG, 0, 255) or 0,
+        type(data.HitboxColorB) == "number" and math.clamp(data.HitboxColorB, 0, 255) or 0
+    )
+    ScriptSettings.HitboxTransparency = type(data.HitboxTransparency) == "number" and math.clamp(data.HitboxTransparency, 0, 1) or 0.7
+    ScriptSettings.AirControlEnabled = data.AirControlEnabled == true
+    ScriptSettings.AirControlSpeed = type(data.AirControlSpeed) == "number" and data.AirControlSpeed or 30
+    ScriptSettings.AutoSpinEnabled = data.AutoSpinEnabled == true
+    ScriptSettings.AutoSpinType = data.AutoSpinType == true
+    ScriptSettings.AutoSpinSlot = type(data.AutoSpinSlot) == "number" and math.clamp(data.AutoSpinSlot, 1, 3) or 1
+    ScriptSettings.AutoAbilityEnabled = data.AutoAbilityEnabled == true
+    ScriptSettings.AutoAbilityType = data.AutoAbilityType == true
+    ScriptSettings.AutoAbilitySlot = type(data.AutoAbilitySlot) == "number" and math.clamp(data.AutoAbilitySlot, 1, 3) or 1
+    ScriptSettings.TracerEnabled = data.TracerEnabled == true
+    ScriptSettings.TracerColor = Color3.fromRGB(
+        type(data.TracerColorR) == "number" and math.clamp(data.TracerColorR, 0, 255) or 255,
+        type(data.TracerColorG) == "number" and math.clamp(data.TracerColorG, 0, 255) or 100,
+        type(data.TracerColorB) == "number" and math.clamp(data.TracerColorB, 0, 255) or 0
+    )
+    ScriptSettings.TracerLength = type(data.TracerLength) == "number" and data.TracerLength or 15
+    ScriptSettings.TracerThickness = type(data.TracerThickness) == "number" and data.TracerThickness or 0.3
+    ScriptSettings.LegitLockEnabled = data.LegitLockEnabled == true
+    
+    -- Обработка клавиши LegitLock (строка или Enum.KeyCode)
     if data.LegitLockKeyCode then
-        ScriptSettings.LegitLockKey = Enum.KeyCode[data.LegitLockKeyCode] or Enum.KeyCode.L
+        local keyCode = data.LegitLockKeyCode
+        -- Если это Enum.KeyCode, конвертируем в строку
+        if typeof(keyCode) == "EnumItem" then
+            keyCode = tostring(keyCode):gsub("Enum.KeyCode.", "")
+        end
+        ScriptSettings.LegitLockKey = Enum.KeyCode[keyCode] or Enum.KeyCode.L
     end
 
     -- Обновление переключателей
