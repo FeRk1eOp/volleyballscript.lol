@@ -1,4 +1,4 @@
--- Fer4ixz ScriptHub V28 FINAL (Volleyball Legends) – полностью исправлен + мобильное перетаскивание
+-- Fer4ixz ScriptHub V28 FINAL (Volleyball Legends) – Mobile Drag + Config Sync + Scrollable Tabs
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -698,7 +698,7 @@ Divider.BorderSizePixel = 0
 Divider.Parent = Sidebar
 
 local BtnContainer = Instance.new("Frame")
-BtnContainer.Size = UDim2.new(1,0,0.8,0)
+BtnContainer.Size = UDim2.new(1,0,0.85,0)
 BtnContainer.BackgroundTransparency = 1
 BtnContainer.Parent = Sidebar
 local BtnLayout = Instance.new("UIListLayout")
@@ -711,11 +711,29 @@ BtnPad.PaddingLeft = UDim.new(0,10)
 BtnPad.PaddingRight = UDim.new(0,10)
 BtnPad.Parent = BtnContainer
 
+-- SCROLLABLE SIDEBAR
+local btnScroll = Instance.new("ScrollingFrame")
+btnScroll.Size = UDim2.new(1,0,0.85,0)
+btnScroll.BackgroundTransparency = 1
+btnScroll.BorderSizePixel = 0
+btnScroll.ScrollBarThickness = 3
+btnScroll.ScrollBarImageColor3 = COLORS.Stroke
+btnScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+btnScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+btnScroll.ScrollingEnabled = true
+btnScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.None
+btnScroll.VerticalScrollBarInset = Enum.ScrollBarInset.None
+btnScroll.Parent = Sidebar
+BtnContainer.Parent = btnScroll
+BtnContainer.Size = UDim2.new(1,0,0,0)
+BtnContainer.BackgroundTransparency = 1
+
 local Content = Instance.new("Frame")
 Content.Size = UDim2.new(1,-150,1,0)
 Content.Position = UDim2.new(0,150,0,0)
 Content.BackgroundColor3 = COLORS.Background
 Content.BackgroundTransparency = 1
+Content.ClipsDescendants = false  -- 🔥 Важно для прокрутки
 Content.Parent = Body
 local ContentPad = Instance.new("UIPadding")
 ContentPad.PaddingTop = UDim.new(0,15)
@@ -886,7 +904,7 @@ local function CreateStepper(parent, labelText, minVal, maxVal, step, defaultVal
     return { setValue = setValue, getValue = function() return current end }
 end
 
--- Tabs
+-- SCROLLABLE TABS
 local tabs = {}
 local function CreateTab(name, title)
     local btn = Instance.new("TextButton")
@@ -904,14 +922,28 @@ local function CreateTab(name, title)
     page.Size = UDim2.new(1,0,1,0)
     page.BackgroundTransparency = 1
     page.BorderSizePixel = 0
-    page.ScrollBarThickness = 4
-    page.CanvasSize = UDim2.new(0,0,0,0)
+    page.ScrollBarThickness = 5
+    page.ScrollBarImageColor3 = COLORS.Stroke
+    page.CanvasSize = UDim2.new(0, 0, 0, 0)
+    page.AutomaticCanvasSize = Enum.AutomaticSize.Y  -- 🔥 Авто-высота контента
+    page.ScrollingEnabled = true
     page.Visible = false
     page.Parent = Content
+    
+    page.HorizontalScrollBarInset = Enum.ScrollBarInset.None
+    page.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+    
     local pageLayout = Instance.new("UIListLayout")
     pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    pageLayout.Padding = UDim.new(0,8)
+    pageLayout.Padding = UDim.new(0, 8)
     pageLayout.Parent = page
+    
+    local pagePadding = Instance.new("UIPadding")
+    pagePadding.PaddingTop = UDim.new(0, 10)
+    pagePadding.PaddingBottom = UDim.new(0, 10)
+    pagePadding.PaddingLeft = UDim.new(0, 5)
+    pagePadding.PaddingRight = UDim.new(0, 15)
+    pagePadding.Parent = page
 
     btn.MouseButton1Click:Connect(function()
         for _, t in pairs(tabs) do
@@ -1452,13 +1484,15 @@ local function createConfig(name)
     return saveCfg(name, data)
 end
 
+-- 🔥 ИСПРАВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ КОНФИГА
 local function loadConfig(name)
     local data = loadCfg(name)
     if not data then return false end
+    
     ScriptSettings.ESPEnabled = data.ESPEnabled
     ScriptSettings.HPEnabled = data.HPEnabled
     ScriptSettings.HitboxEnabled = data.HitboxEnabled
-    ScriptSettings.HitboxExtraSize = data.HitboxExtraSize
+    ScriptSettings.HitboxExtraSize = data.HitboxExtraSize or 0
     ScriptSettings.HitboxShowSphere = data.HitboxShowSphere
     ScriptSettings.HitboxColor = Color3.fromRGB(data.HitboxColorR or 255, data.HitboxColorG or 0, data.HitboxColorB or 0)
     ScriptSettings.HitboxTransparency = data.HitboxTransparency or 0.7
@@ -1479,6 +1513,7 @@ local function loadConfig(name)
         ScriptSettings.LegitLockKey = Enum.KeyCode[data.LegitLockKeyCode] or Enum.KeyCode.L
     end
 
+    -- Обновление переключателей
     if toggleRegistry["Enable Wallhack / ESP"] then toggleRegistry["Enable Wallhack / ESP"](ScriptSettings.ESPEnabled) end
     if toggleRegistry["Show Health (HP)"] then toggleRegistry["Show Health (HP)"](ScriptSettings.HPEnabled) end
     if toggleRegistry["Enable Hitbox Modification"] then toggleRegistry["Enable Hitbox Modification"](ScriptSettings.HitboxEnabled) end
@@ -1489,54 +1524,69 @@ local function loadConfig(name)
     if toggleRegistry["Enable Tracer"] then toggleRegistry["Enable Tracer"](ScriptSettings.TracerEnabled) end
     if toggleRegistry["Legit Lock (Jump turn)"] then toggleRegistry["Legit Lock (Jump turn)"](ScriptSettings.LegitLockEnabled) end
 
-    radiusStepper.setValue(ScriptSettings.HitboxExtraSize)
-    alphaStepper.setValue(ScriptSettings.HitboxTransparency)
-    airSpeedStepper.setValue(ScriptSettings.AirControlSpeed)
-    lengthStepper.setValue(ScriptSettings.TracerLength)
-    thickStepper.setValue(ScriptSettings.TracerThickness)
+    -- Обновление слайдеров
+    if radiusStepper and radiusStepper.setValue then radiusStepper.setValue(ScriptSettings.HitboxExtraSize) end
+    if alphaStepper and alphaStepper.setValue then alphaStepper.setValue(ScriptSettings.HitboxTransparency) end
+    if airSpeedStepper and airSpeedStepper.setValue then airSpeedStepper.setValue(ScriptSettings.AirControlSpeed) end
+    if lengthStepper and lengthStepper.setValue then lengthStepper.setValue(ScriptSettings.TracerLength) end
+    if thickStepper and thickStepper.setValue then thickStepper.setValue(ScriptSettings.TracerThickness) end
 
-    styleTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoSpinType and "Lucky" or "Regular")
-    abilityTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoAbilityType and "Lucky" or "Regular")
-    updateStyleSlotLabel()
-    updateAbilitySlotLabel()
-    for _, btn in ipairs(styleSlotContainer:GetChildren()) do
-        if btn:IsA("TextButton") and tonumber(btn.Text) == ScriptSettings.AutoSpinSlot then
-            btn.BackgroundColor3 = COLORS.ButtonSelected
-        elseif btn:IsA("TextButton") then
-            btn.BackgroundColor3 = COLORS.Button
-        end
-    end
-    for _, btn in ipairs(abilitySlotContainer:GetChildren()) do
-        if btn:IsA("TextButton") and tonumber(btn.Text) == ScriptSettings.AutoAbilitySlot then
-            btn.BackgroundColor3 = COLORS.ButtonSelected
-        elseif btn:IsA("TextButton") then
-            btn.BackgroundColor3 = COLORS.Button
-        end
-    end
+    -- Обновление текста кнопок цветов
     for i, col in ipairs(sphereColors) do
         if col[1] == ScriptSettings.HitboxColor then
             sphereColorIdx = i
-            colorBtn.Text = "Color: " .. col[2]
+            if colorBtn then colorBtn.Text = "Color: " .. col[2] end
             break
         end
     end
     for i, col in ipairs(tracerColors) do
         if col[1] == ScriptSettings.TracerColor then
             tracerColorIdx = i
-            tracerColorBtn.Text = "Color: " .. col[2]
+            if tracerColorBtn then tracerColorBtn.Text = "Color: " .. col[2] end
             break
         end
     end
-    legitKeyLabel.Text = "Toggle key: " .. tostring(ScriptSettings.LegitLockKey):gsub("Enum.KeyCode.", "")
+
+    -- Обновление текста типа спина
+    if styleTypeLabel then styleTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoSpinType and "Lucky" or "Regular") end
+    if abilityTypeLabel then abilityTypeLabel.Text = "Spin type: " .. (ScriptSettings.AutoAbilityType and "Lucky" or "Regular") end
+
+    -- Обновление слотов (визуал)
+    updateStyleSlotLabel()
+    updateAbilitySlotLabel()
+    
+    if styleSlotContainer then
+        for _, btn in ipairs(styleSlotContainer:GetChildren()) do
+            if btn:IsA("TextButton") then
+                local num = tonumber(btn.Text)
+                btn.BackgroundColor3 = (num == ScriptSettings.AutoSpinSlot) and COLORS.ButtonSelected or COLORS.Button
+            end
+        end
+    end
+    if abilitySlotContainer then
+        for _, btn in ipairs(abilitySlotContainer:GetChildren()) do
+            if btn:IsA("TextButton") then
+                local num = tonumber(btn.Text)
+                btn.BackgroundColor3 = (num == ScriptSettings.AutoAbilitySlot) and COLORS.ButtonSelected or COLORS.Button
+            end
+        end
+    end
+
+    -- Обновление ключа легит лока
+    if legitKeyLabel then
+        legitKeyLabel.Text = "Toggle key: " .. tostring(ScriptSettings.LegitLockKey):gsub("Enum.KeyCode.", "")
+    end
     ContextActionService:UnbindAction("LegitLockToggle")
     ContextActionService:BindAction("LegitLockToggle", function(_, state, _)
         if state == Enum.UserInputState.Begin then toggleLegitLock() end
     end, false, ScriptSettings.LegitLockKey)
 
+    -- Применение настроек
     ESP_Settings.ESPEnabled = ScriptSettings.ESPEnabled
     ESP_Settings.HPEnabled = ScriptSettings.HPEnabled
     UpdateESP()
     updateHitboxSphere()
+    
     return true
 end
 
