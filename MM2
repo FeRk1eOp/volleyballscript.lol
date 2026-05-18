@@ -507,8 +507,8 @@ elseif LocalPlayer:FindFirstChild("PlayerGui") then
 end
 
 local screenSize = Camera.ViewportSize
-local width  = math.min(screenSize.X * 0.88, 520)
-local height = math.min(screenSize.Y * 0.82, 560)
+local width  = math.min(screenSize.X * 0.88, 500)
+local height = math.min(screenSize.Y * 0.82, 520)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Size                = UDim2.new(0, width, 0, height)
